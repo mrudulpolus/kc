@@ -18,9 +18,10 @@ package org.kuali.kra.s2s.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlbeans.XmlObject;
-import org.kuali.rice.kns.util.AuditError;
+import org.kuali.kra.s2s.util.AuditError;
 
 import java.util.List;
+
 
 /**
  * 
@@ -28,7 +29,7 @@ import java.util.List;
  * 
  * @author Kuali Research Administration Team (kualidev@oncourse.iu.edu)
  */
-public interface S2SValidatorService{
+public interface S2SValidatorService {
     
     Log LOG = LogFactory.getLog(S2SValidatorService.class);
     public static final String GRANTS_GOV_PREFIX = "/GrantApplication/Forms";

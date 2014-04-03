@@ -18,10 +18,10 @@ package org.kuali.kra.proposaldevelopment.lookup.keyvalue;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPersonRole;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.proposaldevelopment.service.KeyPersonnelService;
 import org.kuali.kra.proposaldevelopment.web.krad.ProposalDevelopmentDocumentForm;
 import org.kuali.rice.core.api.criteria.QueryByCriteria;
@@ -53,42 +53,38 @@ public class ProposalPersonRoleValuesFinder extends UifKeyValuesFinderBase {
     
     @Override
     public List<KeyValue> getKeyValues(ViewModel model, InputField field){
-        return getKeyValues(((ProposalDevelopmentDocumentForm) model).getProposalDevelopmentDocument(),
-                !StringUtils.contains(field.getBindingInfo().getBindingPath(), "addKeyPersonHelper"));
+        return getKeyValues(((ProposalDevelopmentDocumentForm) model).getProposalDevelopmentDocument());
     }
     
-    public List<KeyValue> getKeyValues(ProposalDevelopmentDocument document, boolean alreadyAddedPerson) {
+    public List<KeyValue> getKeyValues(ProposalDevelopmentDocument document) {
         Collection<ProposalPersonRole> roles = new ArrayList<ProposalPersonRole>();
         roles.addAll(getDataObjectService().findMatching(ProposalPersonRole.class, QueryByCriteria.Builder.create().build()).getResults());
         final DevelopmentProposal developmentProposal = document.getDevelopmentProposal();
 
         List<KeyValue> keyValues = new ArrayList<KeyValue>();
-        addKeyValue(keyValues, roles, ProposalPersonRole.PRINCIPAL_INVESTIGATOR, developmentProposal, alreadyAddedPerson);
-        addKeyValue(keyValues, roles, ProposalPersonRole.CO_INVESTIGATOR, developmentProposal, alreadyAddedPerson);
-        addKeyValue(keyValues, roles, ProposalPersonRole.KEY_PERSON, developmentProposal, alreadyAddedPerson);
+        addKeyValue(keyValues, roles, ProposalPersonRole.PRINCIPAL_INVESTIGATOR, developmentProposal);
+        addKeyValue(keyValues, roles, ProposalPersonRole.CO_INVESTIGATOR, developmentProposal);
+        addKeyValue(keyValues, roles, ProposalPersonRole.KEY_PERSON, developmentProposal);
         for (ProposalPersonRole role : roles) {
-            addKeyValue(keyValues, role, developmentProposal, alreadyAddedPerson);
+            addKeyValue(keyValues, role, developmentProposal);
         }
         return keyValues;
     }
     
-    protected void addKeyValue(List<KeyValue> keyValues, Collection<ProposalPersonRole> roles, String roleId, DevelopmentProposal developmentProposal, boolean alreadyAddedPerson) {
+    protected void addKeyValue(List<KeyValue> keyValues, Collection<ProposalPersonRole> roles, String roleId, DevelopmentProposal developmentProposal) {
         ProposalPersonRole curRole = getRoleById(roles, roleId);
         if (curRole != null) {
-            addKeyValue(keyValues, curRole, developmentProposal, alreadyAddedPerson);
+            addKeyValue(keyValues, curRole, developmentProposal);
             roles.remove(curRole);
         }
     }
     
-    protected void addKeyValue(List<KeyValue> keyValues, ProposalPersonRole role, DevelopmentProposal developmentProposal, boolean alreadyAddedPerson) {
+    protected void addKeyValue(List<KeyValue> keyValues, ProposalPersonRole role, DevelopmentProposal developmentProposal) {
         if (role != null) {
             LOG.debug("Adding role " + role.getProposalPersonRoleId());
             LOG.debug("With description " + findRoleDescription(role, developmentProposal));
-    
-            // If the person has already been added, then exclude Key Person
-            if (!(alreadyAddedPerson && ProposalPersonRole.KEY_PERSON.equals(role.getProposalPersonRoleId()))) {  
-                keyValues.add(new ConcreteKeyValue(role.getProposalPersonRoleId(), findRoleDescription(role, developmentProposal)));
-            }
+
+            keyValues.add(new ConcreteKeyValue(role.getProposalPersonRoleId(), findRoleDescription(role, developmentProposal)));
     
             LOG.debug("Returning " + keyValues);
         }

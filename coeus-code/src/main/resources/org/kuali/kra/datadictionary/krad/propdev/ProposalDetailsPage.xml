@@ -42,13 +42,35 @@
 		parent="PropDev-DefaultDetails-Section" p:fieldBindingObjectPath="document.developmentProposal">
 		<property name="items">
 			<list merge="true">
-				<bean parent="PropDev-DetailsPage-PrimeSponsorField" p:order="60" />
+				<bean parent="PropDev-DetailsPage-PrimeSponsorField" p:order="70" />
 				<bean parent="PropDev-DetailsPage-CurrentAwardNumberField"
-					p:order="70" />
-				<bean parent="PropDev-DetailsPage-ContinuedFromField" p:order="80" />
+					p:order="80" />
+				<bean parent="PropDev-DetailsPage-ContinuedFromField" p:order="90" />
+				<bean parent="PropDev-DetailsPage-Keywords" p:order="100"/>
 			</list>
 		</property>
 
+	</bean>
+
+	<bean id="PropDev-DetailsPage-Keywords" parent="PropDev-DetailsPage-Keywords-parentBean"/>
+	<bean id="PropDev-DetailsPage-Keywords-parentBean" abstract="true" parent="Uif-InputField"
+		p:propertyName="propScienceKeywords" p:label="Keywords">
+		<property name="control">
+			<bean parent="Uif-AdvancedMultiSelectControl">
+				<property name="templateOptions">
+					<map merge="true">
+						<entry key="&quot;position&quot;" value="{&quot;my&quot;:&quot;left bottom&quot;, &quot;at&quot;:&quot;left top&quot;}"/>
+					</map>
+				</property>
+			</bean>
+		</property>
+		<property name="optionsFinder">
+			<bean
+				class="org.kuali.rice.krad.keyvalues.PersistableBusinessObjectValuesFinder" 
+				p:businessObjectClass="org.kuali.kra.bo.ScienceKeyword"
+				p:keyAttributeName="scienceKeywordCode"
+				p:labelAttributeName="description"/>
+		</property>
 	</bean>
 
 	<bean id="PropDev-DetailsPage-ProjectDatesField" parent="PropDev-DetailsPage-ProjectDatesField-parentBean" />
@@ -85,24 +107,22 @@
 		p:fieldBindingObjectPath="document.developmentProposal">
 		<property name="items">
 			<list>
-				<bean parent="Uif-InputField" p:propertyName="proposalTypeCode"
+				<bean parent="Uif-InputField" p:propertyName="proposalTypeCode" 		
+					p:enableAutoQuickfinder="false"
 					p:order="10" />
- 				<bean parent="Uif-InputField" p:propertyName="ownedByUnitNumberRestricted"
-					p:order="20" />
-				<bean parent="Uif-InputField" p:propertyName="activityTypeCode"
-					p:order="30">
-					<property name="quickfinder">
-						<bean parent="Uif-QuickFinder" p:returnByScript="true"
-							p:hideCriteriaOnSearch="true" p:viewName="popup" />
-					</property>
-				</bean>
-				<bean parent="PropDev-DetailsPage-ProjectDatesField"
-                                        p:order="40" />
+ 				<bean parent="PropDev-DetailsPage-OwnedByUnitNumberField" 
+					p:enableAutoQuickfinder="false"
+ 					p:order="20"/>
+				<bean parent="Uif-InputField" p:propertyName="activityTypeCode" 
+					p:enableAutoQuickfinder="false"
+					p:order="30" />
+				<bean parent="PropDev-DetailsPage-ProjectDatesField" 
+					p:order="40" />
 				<bean parent="Uif-InputField" p:propertyName="title"
 					p:helperText="Give this proposal a title. Be detailed but concise."
 					p:order="50" />
 				<bean parent="PropDev-DetailsPage-SponsorField" 
-                                        p:order="60" />
+					p:order="60" />
 			</list>
 		</property>
 
@@ -138,7 +158,7 @@
 						<entry key="delay" value="1" />
 						<entry key="html" value="true" />
 						<entry key="select"
-							value="function(event, ui) { ProposalDevelopmentMethods.sponsorSuggestSelect(event, ui); return false; }" />
+							value="function(event, ui) { Kc.PropDev.sponsorSuggestSelect(event, ui); return false; }" />
 					</map>
 				</property>
 				<property name="suggestQuery">
@@ -154,7 +174,7 @@
 		</property>
 		<property name="control">
 			<bean parent="Uif-TextControl"
-				p:onBlurScript="ProposalDevelopmentMethods.updateSponsorName(jQuery(this).val(), jQuery(this).parent().find('.informationalText'));" />
+				p:onBlurScript="Kc.PropDev.updateSponsorName(jQuery(this).val(), jQuery(this).parents('.uif-inputField:first').find('.informationalText'));" />
 		</property>
 	</bean>
 
@@ -170,6 +190,18 @@
 				p:returnByScript="true" p:hideCriteriaOnSearch="true" p:viewName="popup" />
 		</property>
 	</bean>
+
+	<bean id="PropDev-DetailsPage-OwnedByUnitNumberField" parent="PropDev-DetailsPage-OwnedByUnitNumberField-parentBean" />
+	<bean id="PropDev-DetailsPage-OwnedByUnitNumberField-parentBean"
+		abstract="true" parent="Uif-InputField" p:propertyName="ownedByUnitNumber" >
+		<property name="control">
+			<bean parent="Uif-DropdownControl"/>
+		</property>
+		<property name="optionsFinder">
+			<bean class="org.kuali.kra.proposaldevelopment.lookup.keyvalue.LeadUnitValuesFinder" p:addBlankOption="false"/>
+		</property>
+        </bean>
+
 	<bean id="PropDev-DetailsPage-ContinuedFromField" parent="PropDev-DetailsPage-ContinuedFromField-parentBean" />
 	<bean id="PropDev-DetailsPage-ContinuedFromField-parentBean"
 		abstract="true" parent="Uif-InputField" p:propertyName="continuedFrom"

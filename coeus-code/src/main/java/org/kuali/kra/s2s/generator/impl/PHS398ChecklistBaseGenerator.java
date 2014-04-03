@@ -15,9 +15,10 @@
  */
 package org.kuali.kra.s2s.generator.impl;
 
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentService;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
+import org.kuali.kra.proposaldevelopment.budget.service.ProposalBudgetService;
 import org.kuali.kra.s2s.generator.S2SBaseFormGenerator;
-import org.kuali.kra.s2s.service.S2SBudgetCalculatorService;
 import org.kuali.kra.s2s.service.S2SUtilService;
 
 /**
@@ -27,7 +28,8 @@ import org.kuali.kra.s2s.service.S2SUtilService;
  */
 public abstract class PHS398ChecklistBaseGenerator extends S2SBaseFormGenerator {
     protected S2SUtilService s2sUtilService;
-    protected S2SBudgetCalculatorService s2sBudgetCalculatorService;
+    protected ProposalBudgetService proposalBudgetService;
+    protected ProposalDevelopmentService proposalDevelopmentService;
     protected static final int NARRATIVE_CODE_CERTIFICATIONS_ATTACHMENT = 38;
     protected static final String PROPOSAL_YNQ_QUESTION_114 = "114";
     protected static final String PROPOSAL_YNQ_QUESTION_115 = "115";
@@ -44,6 +46,7 @@ public abstract class PHS398ChecklistBaseGenerator extends S2SBaseFormGenerator 
 
     public PHS398ChecklistBaseGenerator() {
         s2sUtilService = KcServiceLocator.getService(S2SUtilService.class);
-        s2sBudgetCalculatorService = KcServiceLocator.getService(S2SBudgetCalculatorService.class);
+        proposalBudgetService = KcServiceLocator.getService(ProposalBudgetService.class);
+        proposalDevelopmentService = KcServiceLocator.getService(ProposalDevelopmentService.class);
     }
 }

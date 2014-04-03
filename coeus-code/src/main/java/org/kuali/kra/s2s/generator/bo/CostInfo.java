@@ -15,24 +15,18 @@
  */
 package org.kuali.kra.s2s.generator.bo;
 
-import org.kuali.kra.budget.BudgetDecimal;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 
-import java.util.LinkedHashMap;
 
 public class CostInfo {
 
     private int budgetPeriod;
-    private BudgetDecimal cost;
+    private ScaleTwoDecimal cost;
     private String category;
     private String categoryType;
     private String description;
     private int quantity;
-    private BudgetDecimal costSharing;
-
-
-    public CostInfo() {
-    }
-
+    private ScaleTwoDecimal costSharing;
 
     /**
      * Getter for property budgetPeriod
@@ -58,7 +52,7 @@ public class CostInfo {
      * 
      * @return Value of property cost.
      */
-    public BudgetDecimal getCost() {
+    public ScaleTwoDecimal getCost() {
         return cost;
     }
 
@@ -67,7 +61,7 @@ public class CostInfo {
      * 
      * @param cost New value of property cost.
      */
-    public void setCost(BudgetDecimal cost) {
+    public void setCost(ScaleTwoDecimal cost) {
         this.cost = cost;
     }
 
@@ -144,25 +138,11 @@ public class CostInfo {
     }
 
     // start add costSaring for fedNonFedBudget repport
-    public BudgetDecimal getCostSharing() {
-        return costSharing==null?BudgetDecimal.ZERO:costSharing;
+    public ScaleTwoDecimal getCostSharing() {
+        return costSharing==null? ScaleTwoDecimal.ZERO:costSharing;
     }
 
-    public void setCostSharing(BudgetDecimal costSharing) {
+    public void setCostSharing(ScaleTwoDecimal costSharing) {
         this.costSharing = costSharing;
-    }
-
-
-    protected LinkedHashMap toStringMapper() {
-        LinkedHashMap hashMap = new LinkedHashMap();
-        hashMap.put("budgetPeriod", getBudgetPeriod());
-        hashMap.put("cost", getCost());
-        hashMap.put("category", getCategory());
-        hashMap.put("categoryType", getCategoryType());
-        hashMap.put("description", getDescription());
-        hashMap.put("quantity", getQuantity());
-        hashMap.put("costSharing", getCostSharing());
-
-        return hashMap;
     }
 }

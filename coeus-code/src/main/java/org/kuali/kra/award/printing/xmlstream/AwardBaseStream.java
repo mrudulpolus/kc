@@ -18,9 +18,14 @@ package org.kuali.kra.award.printing.xmlstream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kuali.coeus.common.framework.person.KcPerson;
+import org.kuali.coeus.common.framework.print.stream.xml.XmlStream;
+import org.kuali.coeus.common.framework.print.util.PrintingUtils;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
 import org.kuali.coeus.common.framework.sponsor.Sponsor;
+import org.kuali.coeus.common.framework.sponsor.term.SponsorTermType;
+import org.kuali.coeus.common.framework.type.ActivityType;
 import org.kuali.coeus.common.framework.unit.admin.UnitAdministrator;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.award.awardhierarchy.AwardHierarchy;
 import org.kuali.kra.award.commitments.AwardCostShare;
@@ -63,14 +68,10 @@ import org.kuali.kra.printing.schema.AwardType.AwardSpecialItems.ForeignTravel;
 import org.kuali.kra.printing.schema.AwardType.AwardSpecialItems.Subcontract;
 import org.kuali.kra.printing.schema.AwardType.AwardTransferringSponsors.TransferringSponsor;
 import org.kuali.kra.printing.schema.SpecialReviewType;
-import org.kuali.kra.printing.util.PrintingUtils;
-import org.kuali.kra.printing.xmlstream.XmlStream;
-import org.kuali.kra.proposaldevelopment.bo.ActivityType;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.timeandmoney.document.TimeAndMoneyDocument;
 import org.kuali.kra.timeandmoney.transactions.AwardAmountTransaction;
 import org.kuali.rice.core.api.datetime.DateTimeService;
-import org.kuali.rice.core.api.util.type.KualiDecimal;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.rice.coreservice.framework.parameter.ParameterService;
 import org.kuali.rice.kew.api.exception.WorkflowException;
 import org.kuali.rice.krad.service.BusinessObjectService;
@@ -741,7 +742,7 @@ public abstract class AwardBaseStream implements XmlStream {
                 }
                 else{
                     indirectCostSharingItem
-                    .setApplicableRate(KualiDecimal.ZERO.bigDecimalValue());  
+                    .setApplicableRate(ScaleTwoDecimal.ZERO.bigDecimalValue());
                 }
                 boolean campus = (awardFandaRate.getOnCampusFlag() != null && awardFandaRate
                         .getOnCampusFlag().equals(ON_CAMPUS_FLAG_SET)) ? true: false;
@@ -753,7 +754,7 @@ public abstract class AwardBaseStream implements XmlStream {
                     indirectCostSharingItem.setUnderRecoveryAmount(awardFandaRate.getUnderrecoveryOfIndirectCost().bigDecimalValue());
                 }
                 else{
-                    indirectCostSharingItem.setUnderRecoveryAmount(KualiDecimal.ZERO.bigDecimalValue());
+                    indirectCostSharingItem.setUnderRecoveryAmount(ScaleTwoDecimal.ZERO.bigDecimalValue());
                 }
                 if(awardFandaRate.getDestinationAccount()!=null){
                     indirectCostSharingItem.setDestinationAccount(awardFandaRate.getDestinationAccount());
@@ -1270,21 +1271,21 @@ public abstract class AwardBaseStream implements XmlStream {
 					amountInfoType.setTotalEndDate(totalEndDate);
 				}
 			}
-			KualiDecimal obligatedChangeDirect = getObligatedChangeDirect();
+			ScaleTwoDecimal obligatedChangeDirect = getObligatedChangeDirect();
 			if (obligatedChangeDirect != null) {
 				amountInfoType.setObligatedChangeDirect(obligatedChangeDirect.bigDecimalValue());
 			}
-			KualiDecimal obligatedChangeIndirect = getObligatedChangeIndirect();
+			ScaleTwoDecimal obligatedChangeIndirect = getObligatedChangeIndirect();
 			if (obligatedChangeIndirect != null) {
 				amountInfoType
 						.setObligatedChangeIndirect(obligatedChangeIndirect.bigDecimalValue());
 			}
-			KualiDecimal anticipatedChangeDirect = getAnticipatedChangeDirect();
+			ScaleTwoDecimal anticipatedChangeDirect = getAnticipatedChangeDirect();
 			if (anticipatedChangeDirect != null) {
 				amountInfoType
 						.setAnticipatedChangeDirect(anticipatedChangeDirect.bigDecimalValue());
 			}
-			KualiDecimal anticipatedChangeIndirect = getAnticipatedChangeIndirect();
+			ScaleTwoDecimal anticipatedChangeIndirect = getAnticipatedChangeIndirect();
 			if (anticipatedChangeIndirect != null) {
 				amountInfoType
 						.setAnticipatedChangeIndirect(anticipatedChangeIndirect.bigDecimalValue());
@@ -1682,7 +1683,7 @@ public abstract class AwardBaseStream implements XmlStream {
 		String countryDesc = null;
 		if (rolodex.getCountryCode() != null) {
 			Country country = PrintingUtils.getCountryFromCode(rolodex
-					.getCountryCode(), businessObjectService);
+					.getCountryCode());
 			if (country != null) {
 				countryDesc = country.getName();
 			}
@@ -2042,8 +2043,8 @@ public abstract class AwardBaseStream implements XmlStream {
 	/*
 	 * This method will get the Anticipated Change Indirect of award Amount Info
 	 */
-	private KualiDecimal getAnticipatedChangeIndirect() {
-		KualiDecimal anticipatedChangeIndirect = null;
+	private ScaleTwoDecimal getAnticipatedChangeIndirect() {
+		ScaleTwoDecimal anticipatedChangeIndirect = null;
 		if (awardAmountInfo.getAnticipatedChangeIndirect() != null) {
 			anticipatedChangeIndirect = awardAmountInfo.getAnticipatedChangeIndirect();
 		}
@@ -2053,8 +2054,8 @@ public abstract class AwardBaseStream implements XmlStream {
 	/*
 	 * This method will get the anticipated change direct of award Amount Info
 	 */
-	private KualiDecimal getAnticipatedChangeDirect() {
-	    KualiDecimal anticipatedChangeDirect = null;
+	private ScaleTwoDecimal getAnticipatedChangeDirect() {
+	    ScaleTwoDecimal anticipatedChangeDirect = null;
 		if (awardAmountInfo.getAnticipatedChangeDirect() != null) {
 			anticipatedChangeDirect = awardAmountInfo.getAnticipatedChangeDirect();
 		}
@@ -2092,8 +2093,8 @@ public abstract class AwardBaseStream implements XmlStream {
 	/*
 	 * This method will get the obligated change indirect of award amount info
 	 */
-	private KualiDecimal getObligatedChangeIndirect() {
-	    KualiDecimal obligatedChangeIndirect = null;
+	private ScaleTwoDecimal getObligatedChangeIndirect() {
+	    ScaleTwoDecimal obligatedChangeIndirect = null;
 		if (awardAmountInfo.getObligatedChangeIndirect() != null) {
 			obligatedChangeIndirect = awardAmountInfo.getObligatedChangeIndirect();
 		}
@@ -2103,8 +2104,8 @@ public abstract class AwardBaseStream implements XmlStream {
 	/*
 	 * This method will get the obligated change direct of award amount info
 	 */
-	private KualiDecimal getObligatedChangeDirect() {
-	    KualiDecimal obligatedChangeDirect = null;
+	private ScaleTwoDecimal getObligatedChangeDirect() {
+	    ScaleTwoDecimal obligatedChangeDirect = null;
 		if (awardAmountInfo.getObligatedChangeDirect() != null) {
 			obligatedChangeDirect = awardAmountInfo.getObligatedChangeDirect();
 		}
@@ -2442,13 +2443,13 @@ public abstract class AwardBaseStream implements XmlStream {
 				&& award.getAwardSpecialRate().getComments() != null) {		  
 			otherHeaderDetails.setSpecialRateComments(award.getAwardBenefitsRateComment().getComments());
 		}
-		KualiDecimal bdecPreAwardAuthorizedAmt = award
-				.getPreAwardAuthorizedAmount() == null ? KualiDecimal.ZERO
+		ScaleTwoDecimal bdecPreAwardAuthorizedAmt = award
+				.getPreAwardAuthorizedAmount() == null ? ScaleTwoDecimal.ZERO
 				: award.getPreAwardAuthorizedAmount();
 		otherHeaderDetails.setPreAwardAuthorizedAmt(bdecPreAwardAuthorizedAmt
 				.bigDecimalValue().setScale(2, BigDecimal.ROUND_HALF_DOWN));
-		KualiDecimal bdecPreAwardAuthorizedAmtModified = award
-                .getPreAwardInstitutionalAuthorizedAmount() == null ? KualiDecimal.ZERO
+		ScaleTwoDecimal bdecPreAwardAuthorizedAmtModified = award
+                .getPreAwardInstitutionalAuthorizedAmount() == null ? ScaleTwoDecimal.ZERO
                  : award.getPreAwardInstitutionalAuthorizedAmount();
 		otherHeaderDetails.setPreAwardAuthorizedAmtModifeid(bdecPreAwardAuthorizedAmtModified
 		        .bigDecimalValue().setScale(2, BigDecimal.ROUND_HALF_DOWN).toString());

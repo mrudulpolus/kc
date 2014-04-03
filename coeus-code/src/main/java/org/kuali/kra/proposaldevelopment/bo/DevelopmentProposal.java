@@ -23,7 +23,16 @@ import org.kuali.coeus.common.framework.org.Organization;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
 import org.kuali.coeus.common.framework.rolodex.nonorg.NonOrganizationalRolodex;
 import org.kuali.coeus.common.framework.sponsor.Sponsor;
+import org.kuali.coeus.common.framework.sponsor.Sponsorable;
+import org.kuali.coeus.common.framework.type.ActivityType;
+import org.kuali.coeus.common.framework.type.ProposalType;
 import org.kuali.coeus.common.framework.unit.Unit;
+import org.kuali.coeus.common.framework.ynq.YnqGroupName;
+import org.kuali.coeus.propdev.impl.budget.ProposalBudgetStatusService;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentService;
+import org.kuali.coeus.propdev.impl.state.ProposalState;
+import org.kuali.coeus.propdev.impl.ynq.ProposalYnq;
 import org.kuali.coeus.sys.framework.model.KcPersistableBusinessObjectBase;
 import org.kuali.coeus.sys.framework.persistence.CompositeDescriptorCustomizer;
 import org.kuali.coeus.sys.framework.persistence.FilterByMapDescriptorCustomizer;
@@ -39,17 +48,15 @@ import org.kuali.kra.infrastructure.Constants;
 import org.kuali.kra.krms.KcKrmsContextBo;
 import org.kuali.kra.krms.KrmsRulesContext;
 import org.kuali.kra.proposaldevelopment.budget.bo.BudgetChangedData;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.proposaldevelopment.hierarchy.HierarchyStatusConstants;
 import org.kuali.kra.proposaldevelopment.hierarchy.ProposalHierarchyException;
 import org.kuali.kra.proposaldevelopment.hierarchy.service.ProposalHierarchyService;
 import org.kuali.kra.proposaldevelopment.service.*;
 import org.kuali.kra.proposaldevelopment.specialreview.ProposalSpecialReview;
 import org.kuali.kra.proposaldevelopment.specialreview.ProposalSpecialReviewExemption;
-import org.kuali.kra.s2s.bo.S2sAppSubmission;
-import org.kuali.kra.s2s.bo.S2sOppForms;
-import org.kuali.kra.s2s.bo.S2sOpportunity;
-import org.kuali.kra.service.Sponsorable;
+import org.kuali.coeus.propdev.impl.s2s.S2sAppSubmission;
+import org.kuali.coeus.propdev.impl.s2s.S2sOppForms;
+import org.kuali.coeus.propdev.impl.s2s.S2sOpportunity;
 import org.kuali.kra.service.YnqService;
 import org.kuali.rice.coreservice.framework.parameter.ParameterService;
 import org.kuali.rice.krad.data.jpa.PortableSequenceGenerator;
@@ -207,8 +214,7 @@ public class DevelopmentProposal extends KcPersistableBusinessObjectBase impleme
     @JoinColumn(name = "PROPOSAL_NUMBER", referencedColumnName = "PROPOSAL_NUMBER", insertable = false, updatable = false)
     private List<ProposalSpecialReview> propSpecialReviews;
 
-    @OneToMany(targetEntity = PropScienceKeyword.class, orphanRemoval = true, cascade = { CascadeType.REFRESH, CascadeType.REMOVE, CascadeType.PERSIST })
-    @JoinColumn(name = "PROPOSAL_NUMBER", referencedColumnName = "PROPOSAL_NUMBER", insertable = false, updatable = false)
+    @OneToMany(mappedBy="developmentProposal", orphanRemoval = true, cascade = { CascadeType.ALL })
     private List<PropScienceKeyword> propScienceKeywords;
 
     @OneToMany(mappedBy="developmentProposal", orphanRemoval = true, cascade = { CascadeType.ALL })
@@ -1223,7 +1229,14 @@ public class DevelopmentProposal extends KcPersistableBusinessObjectBase impleme
     }
 
     public void setPropScienceKeywords(List<PropScienceKeyword> propScienceKeywords) {
-        this.propScienceKeywords = propScienceKeywords;
+    	if (propScienceKeywords != null) {
+    		this.propScienceKeywords = propScienceKeywords;
+    	} else {
+    		this.propScienceKeywords.clear();
+    	}
+    	for (PropScienceKeyword keyword : this.propScienceKeywords) {
+    		keyword.setDevelopmentProposal(this);
+    	}
     }
 
     public List<PropScienceKeyword> getPropScienceKeywords() {
@@ -1682,19 +1695,6 @@ public class DevelopmentProposal extends KcPersistableBusinessObjectBase impleme
     }
 
     /**
-     * Gets index i from the propScienceKeywords list.
-     * 
-     * @param index
-     * @return Question at index i
-     */
-    public PropScienceKeyword getPropScienceKeyword(int index) {
-        while (getPropScienceKeywords().size() <= index) {
-            getPropScienceKeywords().add(new PropScienceKeyword());
-        }
-        return getPropScienceKeywords().get(index);
-    }
-
-    /**
      * Gets index i from the narratives list.
      * 
      * @param index
@@ -1838,7 +1838,7 @@ public class DevelopmentProposal extends KcPersistableBusinessObjectBase impleme
      */
     public String getBudgetStatusDescription() {
         if (StringUtils.isEmpty(budgetStatusDescription)) {
-            KcServiceLocator.getService(ProposalStatusService.class).loadBudgetStatus(this);
+            KcServiceLocator.getService(ProposalBudgetStatusService.class).loadBudgetStatus(this);
         }
         return budgetStatusDescription;
     }
@@ -1974,7 +1974,7 @@ public class DevelopmentProposal extends KcPersistableBusinessObjectBase impleme
         if (isChild()) {
             try {
                 DevelopmentProposal parent = getProposalHierarchyService().lookupParent(this);
-                KcServiceLocator.getService(ProposalStatusService.class).loadBudgetStatus(parent);
+                KcServiceLocator.getService(ProposalBudgetStatusService.class).loadBudgetStatus(parent);
                 retval = parent.isProposalComplete();
             } catch (ProposalHierarchyException x) {
                 // this should never happen   

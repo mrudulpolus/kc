@@ -38,21 +38,24 @@ import org.kuali.coeus.common.framework.person.KcPerson;
 import org.kuali.coeus.common.framework.person.KcPersonService;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
 import org.kuali.coeus.common.framework.sponsor.Sponsor;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.propdev.impl.ynq.ProposalYnq;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.kra.budget.BudgetDecimal;
 import org.kuali.kra.budget.core.Budget;
 import org.kuali.kra.budget.distributionincome.BudgetProjectIncome;
 import org.kuali.kra.budget.document.BudgetDocument;
 import org.kuali.kra.budget.parameters.BudgetPeriod;
 import org.kuali.kra.proposaldevelopment.bo.*;
 import org.kuali.kra.proposaldevelopment.budget.modular.BudgetModularIdc;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.s2s.S2SException;
-import org.kuali.kra.s2s.bo.S2sOpportunity;
+import org.kuali.coeus.propdev.impl.s2s.S2sOpportunity;
 import org.kuali.kra.s2s.generator.bo.DepartmentalPerson;
 import org.kuali.kra.s2s.util.S2SConstants;
+import org.kuali.rice.kew.api.exception.WorkflowException;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Map;
 
 /**
@@ -88,13 +91,13 @@ public class RRSF424V1_0Generator extends RRSF424BaseGenerator {
 							.getS2sOpportunity().getS2sSubmissionType()
 							.getDescription()));
 		}
-		rrsf424.setSubmittedDate(s2sUtilService.getCurrentCalendar());
+		rrsf424.setSubmittedDate(Calendar.getInstance());
 		Rolodex rolodex = pdDoc.getDevelopmentProposal()
 				.getApplicantOrganization().getOrganization().getRolodex();
 		if (rolodex != null) {
 			rrsf424.setStateID(rolodex.getState());
 		}
-		String federalId = s2sUtilService.getFederalId(pdDoc);
+		String federalId = proposalDevelopmentService.getFederalId(pdDoc);
 		if (federalId != null) {
 			if (federalId.length() > 30) {
 				rrsf424.setFederalID(federalId.substring(0, 30));
@@ -175,7 +178,7 @@ public class RRSF424V1_0Generator extends RRSF424BaseGenerator {
 		} else {
 			rrsf424.setAORSignature("");
 		}
-		rrsf424.setAORSignedDate(s2sUtilService.getCurrentCalendar());
+		rrsf424.setAORSignedDate(Calendar.getInstance());
 		rrSF424Document.setRRSF424(rrsf424);
 		return rrSF424Document;
 	}
@@ -188,9 +191,13 @@ public class RRSF424V1_0Generator extends RRSF424BaseGenerator {
 	 * @throws S2SException
 	 */
 	private EstimatedProjectFunding getProjectFunding() throws S2SException {
-		BudgetDocument budgetDocument = s2sBudgetCalculatorService
-				.getFinalBudgetVersion(pdDoc);
-		Budget budget = budgetDocument == null ? null : budgetDocument
+        BudgetDocument budgetDocument = null;
+        try {
+            budgetDocument = proposalBudgetService.getFinalBudgetVersion(pdDoc);
+        } catch (WorkflowException e) {
+            throw new S2SException(e);
+        }
+        Budget budget = budgetDocument == null ? null : budgetDocument
 				.getBudget();
 		EstimatedProjectFunding funding = EstimatedProjectFunding.Factory
 				.newInstance();
@@ -201,9 +208,9 @@ public class RRSF424V1_0Generator extends RRSF424BaseGenerator {
 
 		if (budget != null) {
 			if (budget.getModularBudgetFlag()) {
-				BudgetDecimal fundsRequested = BudgetDecimal.ZERO;
-				BudgetDecimal totalDirectCost = BudgetDecimal.ZERO;
-				BudgetDecimal totalCost = BudgetDecimal.ZERO;
+				ScaleTwoDecimal fundsRequested = ScaleTwoDecimal.ZERO;
+				ScaleTwoDecimal totalDirectCost = ScaleTwoDecimal.ZERO;
+				ScaleTwoDecimal totalCost = ScaleTwoDecimal.ZERO;
 				// get modular budget amounts instead of budget detail amounts
 				for (BudgetPeriod budgetPeriod : budget.getBudgetPeriods()) {
 					totalDirectCost = totalDirectCost.add(budgetPeriod
@@ -220,7 +227,7 @@ public class RRSF424V1_0Generator extends RRSF424BaseGenerator {
 				budget.setTotalCost(totalCost);
 			}
 
-			BudgetDecimal fedNonFedCost = BudgetDecimal.ZERO;
+			ScaleTwoDecimal fedNonFedCost = ScaleTwoDecimal.ZERO;
 			fedNonFedCost = fedNonFedCost.add(budget.getTotalCost());
 			fedNonFedCost = fedNonFedCost.add(budget.getCostSharingAmount());
 
@@ -315,7 +322,7 @@ public class RRSF424V1_0Generator extends RRSF424BaseGenerator {
 	 *
 	 * This method is used to get Contact person information
 	 *
-	 * @param rolodex(Rolodex)
+	 * @param rolodexOrganization
 	 * @return ContactPersonInfo corresponding to the Rolodex object.
 	 */
 	private ContactPersonInfo getContactInfo(Rolodex rolodexOrganization) {

@@ -24,21 +24,20 @@ import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.apache.xpath.XPathAPI;
+import org.kuali.coeus.common.framework.print.Printable;
+import org.kuali.coeus.common.framework.print.PrintingException;
+import org.kuali.coeus.common.framework.print.PrintingService;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.kra.bo.SponsorFormTemplate;
 import org.kuali.kra.infrastructure.Constants;
-import org.kuali.kra.printing.Printable;
-import org.kuali.kra.printing.PrintingException;
-import org.kuali.kra.printing.service.PrintingService;
 import org.kuali.kra.proposaldevelopment.bo.AttachmentDataSource;
 import org.kuali.kra.proposaldevelopment.bo.Narrative;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPersonBiography;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.s2s.S2SException;
-import org.kuali.kra.s2s.bo.S2sAppAttachments;
-import org.kuali.kra.s2s.bo.S2sAppSubmission;
-import org.kuali.kra.s2s.bo.S2sApplication;
-import org.kuali.kra.s2s.bo.S2sOppForms;
+import org.kuali.coeus.propdev.impl.s2s.S2sAppAttachments;
+import org.kuali.coeus.propdev.impl.s2s.S2sAppSubmission;
+import org.kuali.coeus.propdev.impl.s2s.S2sApplication;
+import org.kuali.coeus.propdev.impl.s2s.S2sOppForms;
 import org.kuali.kra.s2s.formmapping.FormMappingInfo;
 import org.kuali.kra.s2s.formmapping.FormMappingLoader;
 import org.kuali.kra.s2s.generator.S2SBaseFormGenerator;
@@ -50,10 +49,10 @@ import org.kuali.kra.s2s.service.PrintService;
 import org.kuali.kra.s2s.service.S2SFormGeneratorService;
 import org.kuali.kra.s2s.service.S2SUtilService;
 import org.kuali.kra.s2s.service.S2SValidatorService;
+import org.kuali.kra.s2s.util.AuditError;
 import org.kuali.kra.s2s.util.XPathExecutor;
 import org.kuali.rice.core.api.config.property.ConfigurationService;
 import org.kuali.rice.kns.util.AuditCluster;
-import org.kuali.rice.kns.util.AuditError;
 import org.kuali.rice.kns.util.KNSGlobalVariables;
 import org.kuali.rice.krad.service.BusinessObjectService;
 import org.w3c.dom.Element;
@@ -83,37 +82,19 @@ public class PrintServiceImpl implements PrintService {
 	private S2SUtilService s2SUtilService;
 	private PrintingService printingService;
 	File grantsGovXmlDirectoryFile = null;
-	/**
-	 * Prints the proposal sponsor forms by passing the given proposal
-	 * information to {@link ProposalPrintReader}
-	 * 
-	 * @param proposalNumber
-	 *            proposal number.
-	 * @param sponsorFormTemplates
-	 *            list of SponsorFormTemplate.
-	 * @return byte array of forms corresponding to the proposal number and
-	 *         SponsorFormTemplate objects.
-	 * @throws S2SException
-	 * @see org.kuali.kra.s2s.service.PrintService#printProposalSponsorForms(java.lang.String,
-	 *      java.util.List)
-	 */
-	public byte[] printProposalSponsorForms(String proposalNumber,
-			List<SponsorFormTemplate> sponsorFormTemplates) throws S2SException {
-		throw new RuntimeException("Unsupported functionality");
-	}
 
 	/**
 	 * 
 	 * This method is used for the printing of forms in PDF format. It generates
 	 * PDF forms and puts it into {@link AttachmentDataSource}
 	 * 
-	 * @param pdDoc(ProposalDevelopmentDocument)
+	 * @param pdDoc (ProposalDevelopmentDocument)
 	 * @return {@link AttachmentDataSource} which contains all information
 	 *         related to the generated PDF
 	 * @throws
 	 * @throws S2SException
 	 * 
-	 * @see org.kuali.kra.s2s.service.PrintService#printForm(org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument)
+	 * @see org.kuali.kra.s2s.service.PrintService#printForm(org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument)
 	 */
 	public org.kuali.kra.proposaldevelopment.bo.AttachmentDataSource printForm(
 			ProposalDevelopmentDocument pdDoc) throws S2SException,
@@ -275,8 +256,6 @@ public class PrintServiceImpl implements PrintService {
 				continue;
 			}
 
-//			XmlObject formObject = s2sFormGenerator.getFormObject(formFragment);
-//			if (s2SValidatorService.validate(formObject, errors)) {
 				byte[] formXmlBytes = formFragment.xmlText().getBytes();
 				S2SFormPrint formPrintable = new S2SFormPrint();
 
@@ -290,7 +269,6 @@ public class PrintServiceImpl implements PrintService {
 				Map<String, byte[]> formXmlDataMap = new LinkedHashMap<String, byte[]>();
 				formXmlDataMap.put(info.getFormName(), formXmlBytes);
 				formPrintable.setXmlDataMap(formXmlDataMap);
-//				S2sAppSubmission submittedS2SAppSubmission = getLatestS2SAppSubmission(pdDoc);
 				S2sApplication s2sApplciation = getBusinessObjectService().findBySinglePrimaryKey(S2sApplication.class, pdDoc.getDevelopmentProposal().getProposalNumber());//submittedS2SAppSubmission.getS2sApplication();
 				List<S2sAppAttachments> attachmentList = s2sApplciation.getS2sAppAttachmentList();
 
@@ -450,9 +428,9 @@ public class PrintServiceImpl implements PrintService {
 
 	protected void setValidationErrorMessage(List<AuditError> errors) {
 		LOG.info("Error list size:" + errors.size() + errors.toString());
-		List<AuditError> auditErrors = new ArrayList<AuditError>();
+		List<org.kuali.rice.kns.util.AuditError> auditErrors = new ArrayList<>();
 		for (AuditError error : errors) {
-			auditErrors.add(new AuditError(error.getErrorKey(),
+			auditErrors.add(new org.kuali.rice.kns.util.AuditError(error.getErrorKey(),
 					Constants.GRANTS_GOV_GENERIC_ERROR_KEY, error.getLink(),
 					new String[] { error.getMessageKey() }));
 		}
@@ -479,22 +457,8 @@ public class PrintServiceImpl implements PrintService {
 
 	protected XmlObject getFormObject(GrantApplicationDocument submittedXml,
 			FormMappingInfo info) {
-		XmlObject formObject = null;
 		Forms forms = submittedXml.getGrantApplication().getForms();
 		return forms.newCursor().getObject();
-//		if (forms != null) {
-//			XmlCursor formCursor = forms.newCursor();
-//			formCursor.toNextToken();
-//			do {
-//				if (formCursor.getName().getNamespaceURI().equals(
-//						info.getNameSpace())) {
-//					formObject = formCursor.getObject();
-//					break;
-//				}
-//			} while (formCursor.toNextSibling());
-//		}
-		
-//		return formObject;
 	}
 
 	/**

@@ -21,14 +21,17 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.kuali.coeus.common.framework.version.VersionStatus;
+import org.kuali.coeus.common.framework.version.history.VersionHistory;
+import org.kuali.coeus.common.framework.version.history.VersionHistoryService;
+import org.kuali.coeus.propdev.impl.budget.ProposalBudgetStatusService;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.controller.StrutsConfirmation;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.coeus.sys.framework.workflow.KcDocumentRejectionService;
 import org.kuali.kra.award.document.AwardDocument;
 import org.kuali.kra.award.home.Award;
 import org.kuali.kra.award.home.ContactRole;
-import org.kuali.kra.bo.versioning.VersionHistory;
-import org.kuali.kra.bo.versioning.VersionStatus;
 import org.kuali.kra.budget.calculator.BudgetCalculationService;
 import org.kuali.kra.budget.core.*;
 import org.kuali.kra.budget.distributionincome.BudgetDistributionAndIncomeService;
@@ -52,10 +55,7 @@ import org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal;
 import org.kuali.kra.proposaldevelopment.budget.modular.BudgetModularService;
 import org.kuali.kra.proposaldevelopment.budget.service.BudgetPrintService;
 import org.kuali.kra.proposaldevelopment.budget.service.BudgetSubAwardService;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.proposaldevelopment.hierarchy.ProposalHierarcyActionHelper;
-import org.kuali.kra.proposaldevelopment.service.ProposalStatusService;
-import org.kuali.kra.service.VersionHistoryService;
 import org.kuali.kra.budget.web.struts.action.BudgetActionBase;
 import org.kuali.rice.core.api.util.KeyValue;
 import org.kuali.rice.coreservice.framework.parameter.ParameterService;
@@ -643,7 +643,7 @@ public class BudgetAction extends BudgetActionBase {
         BudgetParent budgetParent = budgetDocument.getParentDocument().getBudgetParent();
         if (budgetParent instanceof DevelopmentProposal) {
             DevelopmentProposal proposal = (DevelopmentProposal)budgetParent;
-            KcServiceLocator.getService(ProposalStatusService.class).loadBudgetStatus(proposal);
+            KcServiceLocator.getService(ProposalBudgetStatusService.class).loadBudgetStatus(proposal);
         }
         if (budget.getFinalVersionFlag() != null && Boolean.TRUE.equals(budget.getFinalVersionFlag())) {
             budget.setBudgetStatus(budgetParent.getBudgetStatus());

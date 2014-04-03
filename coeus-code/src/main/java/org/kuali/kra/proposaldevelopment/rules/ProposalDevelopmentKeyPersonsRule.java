@@ -21,17 +21,17 @@ import org.apache.commons.logging.LogFactory;
 import org.kuali.coeus.common.framework.person.KcPersonService;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
 import org.kuali.coeus.common.framework.unit.Unit;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.rule.KcTransactionalDocumentRuleBase;
 import org.kuali.kra.bo.DegreeType;
 import org.kuali.kra.infrastructure.KeyConstants;
 import org.kuali.kra.proposaldevelopment.bo.*;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.proposaldevelopment.rule.AddKeyPersonRule;
 import org.kuali.kra.proposaldevelopment.rule.CalculateCreditSplitRule;
 import org.kuali.kra.proposaldevelopment.rule.ChangeKeyPersonRule;
 import org.kuali.kra.proposaldevelopment.service.KeyPersonnelService;
 import org.kuali.rice.core.api.util.RiceKeyConstants;
-import org.kuali.rice.core.api.util.type.KualiDecimal;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.rice.krad.bo.BusinessObject;
 import org.kuali.rice.krad.document.Document;
 import org.kuali.rice.krad.util.GlobalVariables;
@@ -48,7 +48,7 @@ import static org.kuali.kra.infrastructure.KeyConstants.*;
 
 /**
  * Implementation of business rules required for the Key Persons Page of the 
- * <code>{@link org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument}</code>.
+ * <code>{@link org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument}</code>.
  *
  * @see org.kuali.rice.kns.rules.BusinessRule
  * @author $Author: cdenne $
@@ -68,7 +68,7 @@ public class ProposalDevelopmentKeyPersonsRule extends KcTransactionalDocumentRu
 
     /**
      * Rule invoked upon saving persons to a 
-     * <code>{@link org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument}</code>
+     * <code>{@link org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument}</code>
      *
      * @param document ProposalDevelopmentDocument being saved
      * @return boolean
@@ -87,11 +87,9 @@ public class ProposalDevelopmentKeyPersonsRule extends KcTransactionalDocumentRu
                  
             }
             
-            if (person.getProposalPersonExtendedAttributes() != null 
-                    && person.getProposalPersonExtendedAttributes().getCitizenshipTypeCode() == null) {
+            if (person.getCitizenshipTypeCode() == null) {
                 LOG.debug("error.noCitizenshipType");
-                //document.developmentProposalList[0].proposalPersons[0].proposalPersonExtendedAttributes.citizenshipTypeCode
-                reportError("document.developmentProposalList[0].proposalPersons[" + personIndex + "].proposalPersonExtendedAttributes.citizenshipTypeCode", ERROR_MISSING_CITIZENSHIP_TYPE);
+                reportError("document.developmentProposalList[0].proposalPersons[" + personIndex + "].citizenshipTypeCode", ERROR_MISSING_CITIZENSHIP_TYPE);
                 retval = false;
             }
             
@@ -125,8 +123,8 @@ public class ProposalDevelopmentKeyPersonsRule extends KcTransactionalDocumentRu
                 //retval = false;
             }
             
-            if(person.getPercentageEffort()!= null && (person.getPercentageEffort().isLessThan(new KualiDecimal(0)) 
-                    || person.getPercentageEffort().isGreaterThan(new KualiDecimal(100)))){
+            if(person.getPercentageEffort()!= null && (person.getPercentageEffort().isLessThan(new ScaleTwoDecimal(0))
+                    || person.getPercentageEffort().isGreaterThan(new ScaleTwoDecimal(100)))){
                 GlobalVariables.getMessageMap().putError("document.developmentProposalList[0].proposalPersons[" + personIndex + "].percentageEffort", ERROR_PERCENTAGE,
                         new String[] {"Percentage Effort" });
                 //retval = false;

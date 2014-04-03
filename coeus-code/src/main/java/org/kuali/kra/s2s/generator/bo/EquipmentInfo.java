@@ -15,20 +15,19 @@
  */
 package org.kuali.kra.s2s.generator.bo;
 
-import org.kuali.kra.budget.BudgetDecimal;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 public class EquipmentInfo {
 
     private List<CostInfo> cvEquipmentList;
-    private BudgetDecimal totalFund;
+    private ScaleTwoDecimal totalFund;
     private List<CostInfo> cvExtraEquipmentList;
-    private BudgetDecimal totalExtraFund = BudgetDecimal.ZERO;
-    private BudgetDecimal totalNonFund = BudgetDecimal.ZERO;
-    private BudgetDecimal totalExtraNonFund = BudgetDecimal.ZERO;
+    private ScaleTwoDecimal totalExtraFund = ScaleTwoDecimal.ZERO;
+    private ScaleTwoDecimal totalNonFund = ScaleTwoDecimal.ZERO;
+    private ScaleTwoDecimal totalExtraNonFund = ScaleTwoDecimal.ZERO;
 
 
     public EquipmentInfo() {
@@ -50,7 +49,7 @@ public class EquipmentInfo {
     /**
      * Setter for property cvEquipmentList.
      * 
-     * @param versionNumber New value of property versionNumber.
+     * @param cvEquipmentList New value of property cvEquipmentList.
      */
     public void setEquipmentList(List<CostInfo> cvEquipmentList) {
         this.cvEquipmentList = cvEquipmentList;
@@ -62,7 +61,7 @@ public class EquipmentInfo {
      * 
      * @return Value of property totalFund.
      */
-    public BudgetDecimal getTotalFund() {
+    public ScaleTwoDecimal getTotalFund() {
         return totalFund;
     }
 
@@ -71,7 +70,7 @@ public class EquipmentInfo {
      * 
      * @param totalFund New value of property totalFund.
      */
-    public void setTotalFund(BudgetDecimal totalFund) {
+    public void setTotalFund(ScaleTwoDecimal totalFund) {
         this.totalFund = totalFund;
     }
 
@@ -94,7 +93,7 @@ public class EquipmentInfo {
      * 
      * @return Value of property totalExtraFund.
      */
-    public BudgetDecimal getTotalExtraFund() {
+    public ScaleTwoDecimal getTotalExtraFund() {
         return totalExtraFund;
     }
 
@@ -103,7 +102,7 @@ public class EquipmentInfo {
      * 
      * @param totalExtraFund New value of property totalExtraFund.
      */
-    public void setTotalExtraFund(BudgetDecimal totalExtraFund) {
+    public void setTotalExtraFund(ScaleTwoDecimal totalExtraFund) {
         this.totalExtraFund = totalExtraFund;
     }
 
@@ -113,7 +112,7 @@ public class EquipmentInfo {
      * 
      * @return Value of property totalNonFund.
      */
-    public BudgetDecimal getTotalNonFund() {
+    public ScaleTwoDecimal getTotalNonFund() {
         return totalNonFund;
     }
 
@@ -122,7 +121,7 @@ public class EquipmentInfo {
      * 
      * @param totalNonFund New value of property totalNonFund.
      */
-    public void setTotalNonFund(BudgetDecimal totalNonFund) {
+    public void setTotalNonFund(ScaleTwoDecimal totalNonFund) {
         this.totalNonFund = totalNonFund;
     }
 
@@ -131,7 +130,7 @@ public class EquipmentInfo {
      * 
      * @return Value of property totalExtraNonFund.
      */
-    public BudgetDecimal getTotalExtraNonFund() {
+    public ScaleTwoDecimal getTotalExtraNonFund() {
         return totalExtraNonFund;
     }
 
@@ -140,17 +139,7 @@ public class EquipmentInfo {
      * 
      * @param totalExtraNonFund New value of property totalExtraNonFund.
      */
-    public void setTotalExtraNonFund(BudgetDecimal totalExtraNonFund) {
+    public void setTotalExtraNonFund(ScaleTwoDecimal totalExtraNonFund) {
         this.totalExtraNonFund = totalExtraNonFund;
-    }
-
-
-    protected LinkedHashMap toStringMapper() {
-        LinkedHashMap hashMap = new LinkedHashMap();
-        hashMap.put("totalFund", getTotalFund());
-        hashMap.put("totalExtraFund", getTotalExtraFund());
-        hashMap.put("totalNonFund", getTotalNonFund());
-        hashMap.put("totalExtraNonFund", getTotalExtraNonFund());
-        return hashMap;
     }
 }

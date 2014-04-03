@@ -16,9 +16,13 @@
 package org.kuali.kra.proposaldevelopment.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.kuali.coeus.common.framework.custom.attr.CustomAttributeDocValue;
+import org.kuali.coeus.common.framework.custom.attr.CustomAttributeDocument;
 import org.kuali.coeus.common.framework.org.Organization;
 import org.kuali.coeus.common.framework.unit.Unit;
 import org.kuali.coeus.common.framework.unit.UnitService;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.propdev.impl.person.ProposalPersonYnq;
 import org.kuali.coeus.sys.framework.auth.perm.KcAuthorizationService;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.bo.*;
@@ -37,7 +41,6 @@ import org.kuali.kra.proposaldevelopment.budget.bo.BudgetSubAwardAttachment;
 import org.kuali.kra.proposaldevelopment.budget.bo.BudgetSubAwardFiles;
 import org.kuali.kra.proposaldevelopment.budget.bo.BudgetSubAwards;
 import org.kuali.kra.proposaldevelopment.budget.modular.BudgetModular;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.proposaldevelopment.hierarchy.HierarchyStatusConstants;
 import org.kuali.kra.proposaldevelopment.questionnaire.ProposalDevelopmentModuleQuestionnaireBean;
 import org.kuali.kra.proposaldevelopment.questionnaire.ProposalDevelopmentS2sModuleQuestionnaireBean;
@@ -209,14 +212,6 @@ public class ProposalCopyServiceImpl implements ProposalCopyService {
                 moduleQuestionnaireBean = new ProposalDevelopmentS2sModuleQuestionnaireBean(doc.getDevelopmentProposal());
                 destModuleQuestionnaireBean = new ProposalDevelopmentS2sModuleQuestionnaireBean(newDoc.getDevelopmentProposal());
                 questionnaireAnswerService.copyAnswerHeaders(moduleQuestionnaireBean, destModuleQuestionnaireBean);                
-            }
-            
-            //save extended attributes
-            List<ProposalPerson> proposalPersons = newDoc.getDevelopmentProposal().getProposalPersons();
-            for (ProposalPerson person : proposalPersons) {
-                if (person.getProposalPersonExtendedAttributes() != null) {
-                    this.businessObjectService.save(person.getProposalPersonExtendedAttributes());
-                }
             }
             
             copyCustomData(doc, newDoc);
@@ -503,21 +498,6 @@ public class ProposalCopyServiceImpl implements ProposalCopyService {
             proposalperson.setProposalNumber(newDoc.getDevelopmentProposal().getProposalNumber());
             for (ProposalPersonUnit proposalPersonUnit : proposalperson.getUnits()) {
                 ObjectUtils.materializeObjects(proposalPersonUnit.getCreditSplits());
-            }
-            
-            /**
-             * Need to copy extended attributes KRACOEUS-4834
-             */
-            for (ProposalPerson srcProposalperson : srcDoc.getDevelopmentProposal().getProposalPersons()) {
-                if (StringUtils.equals(proposalperson.getFullName(), srcProposalperson.getFullName())
-                    && StringUtils.equals(proposalperson.getProposalPersonRoleId(), srcProposalperson.getProposalPersonRoleId())) {
-                    if (srcProposalperson.getProposalPersonExtendedAttributes() != null) {
-                        ProposalPersonExtendedAttributes ppea = 
-                            (ProposalPersonExtendedAttributes) ObjectUtils.deepCopy(srcProposalperson.getProposalPersonExtendedAttributes());
-                        ppea.setProposalPerson(proposalperson);
-                        proposalperson.setProposalPersonExtendedAttributes(ppea);
-                    }
-                }
             }
         }
 

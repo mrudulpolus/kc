@@ -17,22 +17,23 @@ package org.kuali.kra.s2s.generator.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.budget.core.BudgetService;
 import org.kuali.kra.budget.document.BudgetDocument;
 import org.kuali.kra.budget.nonpersonnel.BudgetLineItem;
 import org.kuali.kra.budget.parameters.BudgetPeriod;
 import org.kuali.kra.budget.personnel.BudgetPersonnelDetails;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
+import org.kuali.kra.proposaldevelopment.budget.service.ProposalBudgetService;
 import org.kuali.kra.s2s.S2SException;
 import org.kuali.kra.s2s.generator.S2SBaseFormGenerator;
 import org.kuali.kra.s2s.generator.bo.KeyPersonInfo;
 import org.kuali.kra.s2s.service.S2SBudgetCalculatorService;
 import org.kuali.kra.s2s.service.S2SUtilService;
+import org.kuali.kra.s2s.util.AuditError;
 import org.kuali.kra.s2s.util.S2SConstants;
 import org.kuali.kra.s2s.validator.S2SErrorHandler;
 import org.kuali.rice.kew.api.exception.WorkflowException;
-import org.kuali.rice.kns.util.AuditError;
 import org.kuali.rice.krad.service.DocumentService;
 
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ public abstract class RRFedNonFedBudgetBaseGenerator extends S2SBaseFormGenerato
     private static final Log LOG = LogFactory.getLog(RRFedNonFedBudgetBaseGenerator.class);
 
     protected S2SBudgetCalculatorService s2sBudgetCalculatorService;
+    protected ProposalBudgetService proposalBudgetService;
     protected S2SUtilService s2sUtilService;
     private DocumentService documentService ;
     protected BudgetService budgetService;
@@ -69,6 +71,8 @@ public abstract class RRFedNonFedBudgetBaseGenerator extends S2SBaseFormGenerato
         s2sUtilService = KcServiceLocator.getService(S2SUtilService.class);
         s2sBudgetCalculatorService = KcServiceLocator.getService(S2SBudgetCalculatorService.class);
         budgetService = KcServiceLocator.getService(BudgetService.class);
+        documentService = KcServiceLocator.getService(DocumentService.class);
+        proposalBudgetService = KcServiceLocator.getService(ProposalBudgetService.class);
     }
     
     /**
@@ -82,17 +86,15 @@ public abstract class RRFedNonFedBudgetBaseGenerator extends S2SBaseFormGenerato
      */
     protected Boolean hasPersonnelBudget(KeyPersonInfo keyPerson,int period){
         BudgetDocument budgetDocument = null;
-        List<BudgetLineItem> budgetLineItemList = new ArrayList<BudgetLineItem>();
-        List<BudgetPersonnelDetails> budgetPersonnelDetailsList = new ArrayList<BudgetPersonnelDetails>();
-        
+
         try {
             budgetDocument = (BudgetDocument) getDocumentService()
             .getByDocumentHeaderId(pdDoc.getBudgetDocumentVersion(0).getDocumentNumber());
             }
             catch (WorkflowException e) {
                 LOG.error(e.getMessage(), e);
-            }           
-           budgetLineItemList = budgetDocument.getBudget().getBudgetPeriod(period-1).getBudgetLineItems();
+            }
+        List<BudgetLineItem> budgetLineItemList = budgetDocument.getBudget().getBudgetPeriod(period-1).getBudgetLineItems();
            
            for(BudgetLineItem budgetLineItem : budgetLineItemList) {
              for(BudgetPersonnelDetails budgetPersonnelDetails : budgetLineItem.getBudgetPersonnelDetailsList()){                 
@@ -116,7 +118,12 @@ public abstract class RRFedNonFedBudgetBaseGenerator extends S2SBaseFormGenerato
     protected boolean validateBudgetForForm(ProposalDevelopmentDocument pdDoc) throws S2SException {
         boolean valid = true;
 
-        BudgetDocument budget = s2sBudgetCalculatorService.getFinalBudgetVersion(pdDoc);
+        BudgetDocument budget = null;
+        try {
+            budget = proposalBudgetService.getFinalBudgetVersion(pdDoc);
+        } catch (WorkflowException e) {
+            throw new S2SException(e);
+        }
         if(budget != null) {
             for (BudgetPeriod period : budget.getBudget().getBudgetPeriods()) {
                 List<String> participantSupportCode = new ArrayList<String>();
@@ -138,12 +145,12 @@ public abstract class RRFedNonFedBudgetBaseGenerator extends S2SBaseFormGenerato
         }
         return valid;
     }
-    
+
     /**
      * @return the documentService
      */
     public DocumentService getDocumentService() {
-        return KcServiceLocator.getService(DocumentService.class);
+        return documentService;
     }
 
     /**

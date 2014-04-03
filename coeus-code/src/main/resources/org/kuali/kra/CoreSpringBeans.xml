@@ -31,17 +31,21 @@
 
     <!-- TODO: Consolidate these... i.e. <context:component-scan base-package="org.kuali.coeus.common.impl"/>  -->
     <!-- Currently adding only fully annotated services -->
-    <context:component-scan base-package="org.kuali.coeus.common.impl.mail"/>
-    <context:component-scan base-package="org.kuali.coeus.common.impl.rolodex"/>
-    <context:component-scan base-package="org.kuali.coeus.common.impl.person"/>
-    <context:component-scan base-package="org.kuali.coeus.common.impl.version"/>
+	<context:component-scan base-package="org.kuali.coeus.common.notification.impl.service.impl"/>
+
     <context:component-scan base-package="org.kuali.coeus.common.impl.attachment"/>
-    <context:component-scan base-package="org.kuali.coeus.common.impl.unit"/>
+    <context:component-scan base-package="org.kuali.coeus.common.impl.custom.attr"/>
+    <context:component-scan base-package="org.kuali.coeus.common.impl.mail"/>
     <context:component-scan base-package="org.kuali.coeus.common.impl.org"/>
+    <context:component-scan base-package="org.kuali.coeus.common.impl.person"/>
+    <context:component-scan base-package="org.kuali.coeus.common.impl.rolodex"/>
+    <context:component-scan base-package="org.kuali.coeus.common.impl.sponsor"/>
+    <context:component-scan base-package="org.kuali.coeus.common.impl.unit"/>
+    <context:component-scan base-package="org.kuali.coeus.common.impl.version"/>
+
 	<context:component-scan base-package="org.kuali.kra.service.impl"/>
     <context:component-scan base-package="org.kuali.kra.multicampus"/>
 
-	<context:component-scan base-package="org.kuali.coeus.common.notification.impl.service.impl"/>
 
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="properties" value="#{T(org.kuali.rice.core.api.config.property.ConfigContext).getCurrentContextConfig().getProperties()}" />
@@ -488,11 +492,9 @@
                 <value>classpath:org/kuali/kra/datadictionary/ProposalPersonBiographyAttachment.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/ProposalPersonCreditSplit.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/ProposalPersonDegree.xml</value>
-                <value>classpath:org/kuali/kra/datadictionary/ProposalPersonExtendedAttributes.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/ProposalPersonRole.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/ProposalPersonUnit.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/ProposalPersonYnq.xml</value>
-                <value>classpath:org/kuali/kra/datadictionary/ProposalResponse.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/ProposalRoleState.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/ProposalRoleTemplate.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/ProposalSite.xml</value>
@@ -627,6 +629,8 @@
                 <value>classpath:org/kuali/kra/datadictionary/SubAwardAmountInfo.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/SubAwardAmountReleased.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/SubAwardApprovalType.xml</value>
+                <value>classpath:org/kuali/kra/datadictionary/SubAwardAttachmentType.xml</value>
+                <value>classpath:org/kuali/kra/datadictionary/SubAwardAttachments.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/SubAwardCloseout.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/SubAwardContact.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/SubAwardCopyRightsType.xml</value>
@@ -841,7 +845,6 @@
                 <value>classpath:org/kuali/kra/datadictionary/docs/ProposalChangedDataMaintenanceDocument.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/docs/ProposalColumnsToAlterMaintenanceDocument.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/docs/ProposalLocationTypeMaintenanceDocument.xml</value>
-                <value>classpath:org/kuali/kra/datadictionary/docs/ProposalResponseMaintenanceDocument.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/docs/ProposalRoleTemplateMaintenanceDocument.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/docs/ProposalStatusMaintenanceDocument.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/docs/ProposalTypeMaintenanceDocument.xml</value>
@@ -903,6 +906,7 @@
                 <value>classpath:org/kuali/kra/datadictionary/docs/SponsorTermTypeMaintenanceDocument.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/docs/SponsorTypeMaintenanceDocument.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/docs/SubAwardApprovalTypeMaintenanceDocument.xml</value>
+                <value>classpath:org/kuali/kra/datadictionary/docs/SubAwardAttachmentTypeMaintenanceDocument.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/docs/SubAwardCopyRightsTypeMaintenanceDocument.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/docs/SubAwardCostTypeMaintenanceDocument.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/docs/SubAwardFormsMaintenanceDocument.xml</value>
@@ -941,7 +945,8 @@
                 <value>classpath:org/kuali/kra/datadictionary/krad/common/KcComponents.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/krad/common/LandingPageView.xml</value>
                 <value>classpath:org/kuali/kra/datadictionary/krad/common/Questionnaire.xml</value>  
-                <value>classpath:org/kuali/kra/datadictionary/krad/rice-contrib/UifNavigationBar.xml</value>              
+                <value>classpath:org/kuali/kra/datadictionary/krad/rice-contrib/UifNavigationBar.xml</value>
+                <value>classpath:org/kuali/kra/datadictionary/krad/rice-contrib/UifMultiSelect.xml</value>
             </list>
         </property>
         <property name="databaseRepositoryFilePaths">
@@ -1242,15 +1247,11 @@
         <property name="parameterService" ref="parameterService" />
     </bean>
     
-    <bean id="customAttributeService" class="org.kuali.kra.service.impl.CustomAttributeServiceImpl">
-        <property name="businessObjectService" ref="businessObjectService" />
-    </bean>
-    
     <bean id="customAttributeDocumentLookupable" class="org.kuali.rice.kns.lookup.KualiLookupableImpl" scope="prototype">
         <property name="lookupableHelperService" ref="customAttributeDocumentLookupableHelperService" />
     </bean>
 
-    <bean id="customAttributeDocumentLookupableHelperService" class="org.kuali.kra.lookup.CustomAttributeLookupHelperServiceImpl" 
+    <bean id="customAttributeDocumentLookupableHelperService" class="org.kuali.coeus.common.impl.custom.attr.CustomAttributeLookupHelperServiceImpl" 
           parent="parentLookupableHelperService" scope="prototype" />
     
     <bean id="customLookupable" class="org.kuali.kra.lookup.CustomLookupableImpl" scope="prototype">
@@ -1431,7 +1432,7 @@
         <property name="lookupableHelperService" ref="kcPersonLookupableHelperService" />      
     </bean> 
 
-    <bean id="kcPersonLookupableHelperService" class="org.kuali.kra.lookup.KcPersonLookupableHelperServiceImpl" parent="parentLookupableHelperService" 
+    <bean id="kcPersonLookupableHelperService" class="org.kuali.coeus.common.impl.person.KcPersonLookupableHelperServiceImpl" parent="parentLookupableHelperService" 
           scope="prototype" >
         <property name="kcPersonService" ref="kcPersonService" />
     </bean>
@@ -1440,7 +1441,7 @@
         <property name="lookupableHelperService" ref="kcPersonExtendedAttributesLookupableHelperService" /> 
     </bean> 
     
-    <bean id="kcPersonExtendedAttributesLookupableHelperService" class="org.kuali.kra.lookup.KcPersonExtendedAttributesLookupableHelperServiceImpl" 
+    <bean id="kcPersonExtendedAttributesLookupableHelperService" class="org.kuali.coeus.common.impl.person.attr.KcPersonExtendedAttributesLookupableHelperServiceImpl" 
           parent="parentLookupableHelperService" scope="prototype" >
     </bean>
     
@@ -1494,12 +1495,12 @@
 		p:localServiceName="pastApproversDerivedRoleTypeService" 
 		p:serviceInterface="org.kuali.rice.kim.framework.role.RoleTypeService"/>
           
-    <bean id="printBaseXmlStream" class="org.kuali.kra.printing.xmlstream.PrintBaseXmlStream" abstract="true">
+    <bean id="printBaseXmlStream" class="org.kuali.coeus.common.framework.print.stream.xml.PrintBaseXmlStream" abstract="true">
         <property name="businessObjectService" ref="businessObjectService" />
         <property name="dateTimeService" ref="dateTimeService" />
     </bean>
     
-    <bean id="printingService" class="org.kuali.kra.printing.service.impl.PrintingServiceImpl" >
+    <bean id="printingService" class="org.kuali.coeus.common.impl.print.PrintingServiceImpl" >
         <property name="dateTimeService" ref="dateTimeService" />
         <property name="kualiConfigurationService" ref="kualiConfigurationService" />
         <property name="watermarkService" ref="watermarkService" />
@@ -1535,30 +1536,24 @@
 	      scope="prototype">
   	</bean>
     
-    <bean id="sponsorService" class="org.kuali.kra.service.impl.SponsorServiceImpl">
-        <property name="businessObjectService" ref="businessObjectService" />
-        <property name="parameterService" ref="parameterService" />
-        <property name="sponsorHierarchyDao" ref="sponsorHierarchyDao" />
-    </bean>
-    
     <bean id="sponsorLookupable" class="org.kuali.rice.kns.lookup.KualiLookupableImpl" scope="prototype">
         <property name="lookupableHelperService" ref="sponsorLookupableHelperService" />
     </bean>
 
-    <bean id="sponsorLookupableHelperService" class="org.kuali.kra.lookup.SponsorLookupableHelperServiceImpl" parent="parentLookupableHelperService" 
+    <bean id="sponsorLookupableHelperService" class="org.kuali.coeus.common.impl.sponsor.SponsorLookupableHelperServiceImpl" parent="parentLookupableHelperService" 
           scope="prototype" />
 
-    <bean id="sponsorHierarchyDao" class="org.kuali.kra.dao.ojb.SponsorHierarchyDaoOjb" parent="platformAwareDao" />
+    <bean id="sponsorHierarchyDao" class="org.kuali.coeus.common.impl.sponsor.hierarchy.SponsorHierarchyDaoOjb" parent="platformAwareDao" />
     
     <bean id="unitLookupDao" class="org.kuali.coeus.common.impl.unit.UnitLookupDaoOjb" parent="platformAwareDao" />
     
-    <bean id="unitLookupable" class="org.kuali.kra.lookup.UnitLookupableImpl" scope="prototype">
+    <bean id="unitLookupable" class="org.kuali.coeus.common.impl.unit.UnitLookupableImpl" scope="prototype">
         <property name="lookupableHelperService" ref="unitLookupableHelperService" />
         <property name="kcPersonService" ref="kcPersonService" />
         <property name="unitAuthorizationService" ref="unitAuthorizationService" />
     </bean>
     
-    <bean id="unitLookupableHelperService" class="org.kuali.kra.lookup.UnitLookupableHelperServiceImpl" scope="prototype" parent="parentLookupableHelperService">
+    <bean id="unitLookupableHelperService" class="org.kuali.coeus.common.impl.unit.UnitLookupableHelperServiceImpl" scope="prototype" parent="parentLookupableHelperService">
         <property name="kcPersonService" ref="kcPersonService" />
         <property name="unitAuthorizationService" ref="unitAuthorizationService" />
     </bean>
@@ -1616,14 +1611,11 @@
           p:localServiceName="unitRoleTypeService"
           p:serviceInterface="org.kuali.rice.kim.framework.role.RoleTypeService" />  
     
-    <bean id="versionHistoryService" class="org.kuali.kra.service.impl.VersionHistoryServiceImpl">
-        <property name="businessObjectService" ref="businessObjectService" />
-    </bean>
-    <bean id="versionHistoryLookupDao" parent="platformAwareDao" class="org.kuali.kra.dao.ojb.VersionHistoryLookupDaoOjb">
+    <bean id="versionHistoryLookupDao" parent="platformAwareDao" class="org.kuali.coeus.common.impl.version.history.VersionHistoryLookupDaoOjb">
     </bean>
     
     
-    <bean id="watermarkService" class="org.kuali.kra.printing.service.impl.WatermarkServiceImpl" />
+    <bean id="watermarkService" class="org.kuali.coeus.common.impl.print.watermark.WatermarkServiceImpl" />
     
     <bean id="ynqService" class="org.kuali.kra.service.impl.YnqServiceImpl">
         <property name="businessObjectService" ref="businessObjectService" />
@@ -1810,7 +1802,7 @@
         <property name="lookupableHelperService" ref="personSignatureLookupableHelperService" />
     </bean>
 
-    <bean id="personSignatureLookupableHelperService" class="org.kuali.kra.service.impl.PersonSignatureLookupableHelperServiceImpl" 
+    <bean id="personSignatureLookupableHelperService" class="org.kuali.coeus.common.impl.person.signature.PersonSignatureLookupableHelperServiceImpl" 
           parent="parentLookupableHelperService" scope="prototype" />
           
     <bean id="kcNotificationDocumentSecurityTypeService" class="org.kuali.kra.authorization.KcNotificationSecurityAttribute">

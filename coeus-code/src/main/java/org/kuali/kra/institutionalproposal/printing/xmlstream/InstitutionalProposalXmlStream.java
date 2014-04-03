@@ -16,7 +16,10 @@
 package org.kuali.kra.institutionalproposal.printing.xmlstream;
 
 import org.apache.xmlbeans.XmlObject;
+import org.kuali.coeus.common.framework.custom.attr.CustomAttributeDocument;
+import org.kuali.coeus.common.framework.custom.attr.CustomAttributeService;
 import org.kuali.coeus.common.framework.person.KcPerson;
+import org.kuali.coeus.common.framework.print.util.PrintingUtils;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
 import org.kuali.coeus.common.framework.rolodex.nonorg.NonOrganizationalRolodex;
 import org.kuali.coeus.common.framework.sponsor.Sponsor;
@@ -41,9 +44,7 @@ import org.kuali.kra.institutionalproposal.specialreview.InstitutionalProposalSp
 import org.kuali.kra.irb.Protocol;
 import org.kuali.kra.printing.schema.*;
 import org.kuali.kra.printing.schema.InstituteProposalDocument.InstituteProposal;
-import org.kuali.kra.printing.util.PrintingUtils;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
-import org.kuali.kra.service.CustomAttributeService;
 import org.kuali.rice.coreservice.framework.parameter.ParameterConstants;
 import org.kuali.rice.coreservice.framework.parameter.ParameterService;
 
@@ -871,7 +872,7 @@ public class InstitutionalProposalXmlStream extends
 	private void setActivityType(InstitutionalProposal institutionalProposal,
 			InstProposalMasterData instProposalMasterData) {
 		if (institutionalProposal.getActivityType() != null) {
-			org.kuali.kra.proposaldevelopment.bo.ActivityType activityType = institutionalProposal
+			org.kuali.coeus.common.framework.type.ActivityType activityType = institutionalProposal
 					.getActivityType();
 			ActivityType activityTypeXmlObject = ActivityType.Factory
 					.newInstance();
@@ -976,13 +977,13 @@ public class InstitutionalProposalXmlStream extends
 		Map<String, String> proposalTypeDescMap = new HashMap<String, String>();
 		proposalTypeDescMap.put(PROPOSAL_TYPE_CODE, String
 				.valueOf(proposalTypeCode));
-		List<org.kuali.kra.proposaldevelopment.bo.ProposalType> proposalTypeList = null;
-		proposalTypeList = (List<org.kuali.kra.proposaldevelopment.bo.ProposalType>) businessObjectService
+		List<org.kuali.coeus.common.framework.type.ProposalType> proposalTypeList = null;
+		proposalTypeList = (List<org.kuali.coeus.common.framework.type.ProposalType>) businessObjectService
 				.findMatching(
-						org.kuali.kra.proposaldevelopment.bo.ProposalType.class,
+						org.kuali.coeus.common.framework.type.ProposalType.class,
 						proposalTypeDescMap);
 		if (proposalTypeList != null && !proposalTypeList.isEmpty()) {
-			org.kuali.kra.proposaldevelopment.bo.ProposalType proposalType = proposalTypeList
+			org.kuali.coeus.common.framework.type.ProposalType proposalType = proposalTypeList
 					.get(0);
 			proposalTypeDescription = proposalType.getDescription();
 		}

@@ -21,12 +21,12 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.DOMBuilder;
 import org.kuali.kra.infrastructure.Constants;
-import org.kuali.rice.kns.util.AuditError;
+import org.kuali.kra.s2s.util.AuditError;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class S2SErrorHandler {
@@ -34,13 +34,13 @@ public class S2SErrorHandler {
     private static final Log LOG = LogFactory.getLog(S2SErrorHandler.class);
 
     private static Map<String, AuditError> auditErrorMap;
-    private static final String ERROR_MAP_FILE = "/S2SErrorMessages.xml";
+    private static final String ERROR_MAP_FILE = "/org/kuali/kra/s2s/s2sform/S2SErrorMessages.xml";
     private static final String ERROR_MAP_FILE_V2="/org/kuali/kra/s2s/s2sform/S2SErrorMessagesV2.xml";
     public static AuditError getError(String key) {
         if (auditErrorMap == null) {
         	auditErrorMap = new HashMap<String, AuditError>();
             loadErrors(ERROR_MAP_FILE);
-            if((new S2SErrorHandler().getClass().getResourceAsStream(ERROR_MAP_FILE_V2))!=null)
+            if((S2SErrorHandler.class.getResourceAsStream(ERROR_MAP_FILE_V2))!=null)
             loadErrors(ERROR_MAP_FILE_V2);
         }
         AuditError error = auditErrorMap.get(key);
@@ -52,12 +52,11 @@ public class S2SErrorHandler {
     private static void loadErrors(String errorMapFile) {
         InputStream stream = null;
         try {
-            stream = new S2SErrorHandler().getClass().getResourceAsStream(errorMapFile);
+            stream = S2SErrorHandler.class.getResourceAsStream(errorMapFile);
             org.w3c.dom.Document errorsDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
             Document document = new DOMBuilder().build(errorsDocument);
             Element root = document.getRootElement();
-            for (Iterator errorsElementIt = root.getChildren("Error").iterator(); errorsElementIt.hasNext();) {
-                Element errorElement = (Element) errorsElementIt.next();
+            for (Element errorElement : (List<Element>) root.getChildren("Error")) {
                 String errorKey = errorElement.getChildTextTrim("ErrorKey");
                 String messageKey = errorElement.getChildTextTrim("MessageKey");
                 String errorMessage = errorElement.getChildTextTrim("Message");
@@ -67,7 +66,6 @@ public class S2SErrorHandler {
                 AuditError s2sError = new AuditError(errorKey == null ? Constants.NO_FIELD : errorKey, errorMessage, errorFixLink);
                 auditErrorMap.put(messageKey, s2sError);
             }
-           //            }
         }
         catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);

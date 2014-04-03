@@ -21,8 +21,9 @@ import org.apache.commons.beanutils.converters.SqlDateConverter;
 import org.apache.commons.beanutils.converters.SqlTimestampConverter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.kra.budget.BudgetDecimal;
 import org.kuali.kra.budget.calculator.BudgetCalculationService;
 import org.kuali.kra.budget.core.Budget;
 import org.kuali.kra.budget.document.BudgetDocument;
@@ -31,13 +32,13 @@ import org.kuali.kra.budget.nonpersonnel.BudgetLineItemBase;
 import org.kuali.kra.budget.parameters.BudgetPeriod;
 import org.kuali.kra.infrastructure.Constants;
 import org.kuali.kra.infrastructure.KeyConstants;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
-import org.kuali.kra.s2s.generator.bo.BudgetPeriodInfo;
 import org.kuali.rice.coreservice.framework.parameter.ParameterService;
 import org.kuali.rice.krad.util.GlobalVariables;
 import org.kuali.rice.krad.util.MessageMap;
 import org.kuali.rice.krad.util.ObjectUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -48,6 +49,7 @@ import java.util.List;
 public class BudgetPersonnelBudgetServiceImpl implements BudgetPersonnelBudgetService {
 
     private static final Log LOG = LogFactory.getLog(BudgetPersonnelBudgetServiceImpl.class);
+    public static final int BUDGET_PERIOD_1 = 1;
 
     private BudgetPersonService budgetPersonService;
     private BudgetCalculationService budgetCalculationService;
@@ -127,9 +129,9 @@ public class BudgetPersonnelBudgetServiceImpl implements BudgetPersonnelBudgetSe
         String rate = getParameterService().getParameterValueAsString(ProposalDevelopmentDocument.class,
                 Constants.DEFAULT_INFLATION_RATE_FOR_SALARY);
         List<BudgetPeriod> budgetPeriodList = null;
-        BudgetDecimal actualPersonSalary = BudgetDecimal.ZERO;
-        BudgetDecimal personSalary = BudgetDecimal.ZERO;
-        BudgetDecimal newRate = new BudgetDecimal(rate);
+        BigDecimal actualPersonSalary = ScaleTwoDecimal.ZERO.bigDecimalValue();
+        BigDecimal personSalary = ScaleTwoDecimal.ZERO.bigDecimalValue();
+        BigDecimal newRate = new ScaleTwoDecimal(rate).bigDecimalValue();
         budgetPeriodList = budget.getBudgetPeriods();
         
         BudgetPerson budgetPerson = budget.getBudgetPerson(personIndex);
@@ -140,16 +142,16 @@ public class BudgetPersonnelBudgetServiceImpl implements BudgetPersonnelBudgetSe
                 personSalaryDetails.setPersonSequenceNumber(budgetPerson.getPersonSequenceNumber());
                 personSalaryDetails.setBudgetPeriod(budgetPeriodData.getBudgetPeriod());
                 personSalaryDetails.setPersonId(budgetPerson.getPersonId());
-                if (budgetPeriodData.getBudgetPeriod() == BudgetPeriodInfo.BUDGET_PERIOD_1) {
+                if (budgetPeriodData.getBudgetPeriod() == BUDGET_PERIOD_1) {
                     if (budgetPerson.getEffectiveDate().equals(budgetPerson.getStartDate())) {
 
                         personSalaryDetails.setBaseSalary(budgetPerson.getCalculationBase());
-                        actualPersonSalary = budgetPerson.getCalculationBase();
+                        actualPersonSalary = budgetPerson.getCalculationBase().bigDecimalValue();
 
                     } else {
 
                         actualPersonSalary = budgetPerson.getCalculationBase().add(
-                                budgetPerson.getCalculationBase().multiply(newRate.divide(new BudgetDecimal(100)))).setScale(2);
+                                new ScaleTwoDecimal(budgetPerson.getCalculationBase().bigDecimalValue().multiply(newRate.divide(new ScaleTwoDecimal(100).bigDecimalValue(), RoundingMode.HALF_UP)))).bigDecimalValue();
                         
                       
                     }
@@ -157,8 +159,8 @@ public class BudgetPersonnelBudgetServiceImpl implements BudgetPersonnelBudgetSe
 
                 } else {
 
-                    personSalary = actualPersonSalary.add(actualPersonSalary.multiply(newRate.divide(new BudgetDecimal(100)))).setScale(2);
-                    personSalaryDetails.setBaseSalary(personSalary);
+                    personSalary = actualPersonSalary.add(actualPersonSalary.multiply(newRate.divide(new ScaleTwoDecimal(100).bigDecimalValue(), RoundingMode.HALF_UP)));
+                    personSalaryDetails.setBaseSalary(new ScaleTwoDecimal(personSalary));
                     actualPersonSalary = personSalary;
                 }
                 budgetPersonSalaryDetails.add(personSalaryDetails);
@@ -172,7 +174,7 @@ public class BudgetPersonnelBudgetServiceImpl implements BudgetPersonnelBudgetSe
         copyLineItemToPersonnelDetails(selectedBudgetLineItem,budgetPersonnelDetails);
         budgetCalculationService.calculateBudgetLineItem(budget, budgetPersonnelDetails);
         // error message if effective data is out of range
-        if (budgetPersonnelDetails.getSalaryRequested().equals(BudgetDecimal.ZERO)) {
+        if (budgetPersonnelDetails.getSalaryRequested().equals(ScaleTwoDecimal.ZERO)) {
             int budgetPeriodNumber = budgetPersonnelDetails.getBudgetPeriod() - 1;
             BudgetPeriod budgetPeriod = budget.getBudgetPeriod(budgetPeriodNumber);
             Date personEffectiveDate =  budgetPersonnelDetails.getBudgetPerson().getEffectiveDate();

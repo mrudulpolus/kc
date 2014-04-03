@@ -535,8 +535,8 @@
 		<field-descriptor name="longTextField2" column="LNG_TXT_FLD_2" jdbc-type="VARCHAR" />
 		<field-descriptor name="dateField1" column="DATE_FLD_1" jdbc-type="DATE" />
 		<field-descriptor name="dateField2" column="DATE_FLD_2" jdbc-type="DATE" />
-		<field-descriptor name="numberField1" column="NMBR_FLD_1" jdbc-type="DECIMAL" conversion="org.kuali.rice.core.framework.persistence.ojb.conversion.OjbKualiDecimalFieldConversion" />
-		<field-descriptor name="numberField2" column="NMBR_FLD_2" jdbc-type="DECIMAL" conversion="org.kuali.rice.core.framework.persistence.ojb.conversion.OjbKualiDecimalFieldConversion" />
+		<field-descriptor name="numberField1" column="NMBR_FLD_1" jdbc-type="DECIMAL" conversion="org.kuali.coeus.sys.framework.persistence.OjbScaleTwoDecimalFieldConversion" />
+		<field-descriptor name="numberField2" column="NMBR_FLD_2" jdbc-type="DECIMAL" conversion="org.kuali.coeus.sys.framework.persistence.OjbScaleTwoDecimalFieldConversion" />
 		<field-descriptor name="shortTextField3" column="SHRT_TXT_FLD_3" jdbc-type="VARCHAR" />
 		<field-descriptor name="longTextField3" column="LNG_TXT_FLD_3" jdbc-type="VARCHAR" />
 		<field-descriptor name="selectBox1" column="SLCT_BOX_1" jdbc-type="VARCHAR" />
@@ -553,7 +553,7 @@
         <collection-descriptor name="coiDiscDetails" proxy="true" element-class-ref="org.kuali.kra.coi.CoiDiscDetail" collection-class="org.apache.ojb.broker.util.collections.ManageableArrayList" auto-retrieve="true" auto-update="object" auto-delete="none">
             <inverse-foreignkey field-ref="coiDisclProjectId"/>
         </collection-descriptor>		
-		<reference-descriptor name="proposalType" class-ref="org.kuali.kra.proposaldevelopment.bo.ProposalType" auto-retrieve="true" auto-update="none" auto-delete="none"> 
+		<reference-descriptor name="proposalType" class-ref="org.kuali.coeus.common.framework.type.ProposalType" auto-retrieve="true" auto-update="none" auto-delete="none"> 
 			<foreignkey field-ref="selectBox1"/>
 		</reference-descriptor>
         <reference-descriptor name="protocolType" class-ref="org.kuali.kra.irb.protocol.ProtocolType" auto-retrieve="true" auto-update="none" auto-delete="none"> 

@@ -20,15 +20,15 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.infrastructure.Constants;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPersonRole;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPersonUnit;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.proposaldevelopment.service.impl.KeyPersonnelServiceImpl;
 import org.kuali.kra.test.infrastructure.KcIntegrationTestBase;
-import org.kuali.rice.core.api.util.type.KualiDecimal;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.rice.coreservice.framework.parameter.ParameterService;
 import org.kuali.rice.kns.service.KNSServiceLocator;
 import org.kuali.rice.krad.UserSession;
@@ -147,7 +147,7 @@ public class KeyPersonnelServiceTest extends KcIntegrationTestBase {
         getKeyPersonnelService().populateProposalPerson(person, document);
         document.getDevelopmentProposal().addProposalPerson(person);
         
-        Map<String, Map<String,KualiDecimal>> totals = getKeyPersonnelService().calculateCreditSplitTotals(document);
+        Map<String, Map<String,ScaleTwoDecimal>> totals = getKeyPersonnelService().calculateCreditSplitTotals(document);
         for(String key : totals.keySet()) {
             LOG.info("Key = " + key);
         }

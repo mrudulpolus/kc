@@ -15,17 +15,18 @@
  */
 package org.kuali.kra.s2s.service;
 
-import org.kuali.kra.budget.BudgetDecimal;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.kra.budget.core.Budget;
 import org.kuali.kra.budget.core.BudgetCategoryMap;
 import org.kuali.kra.budget.document.BudgetDocument;
 import org.kuali.kra.budget.parameters.BudgetPeriod;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.s2s.S2SException;
 import org.kuali.kra.s2s.generator.bo.BudgetPeriodInfo;
 import org.kuali.kra.s2s.generator.bo.BudgetSummaryInfo;
 import org.kuali.kra.s2s.generator.bo.IndirectCostInfo;
+import org.kuali.kra.s2s.generator.bo.KeyPersonInfo;
 
 import java.util.List;
 
@@ -73,29 +74,6 @@ public interface S2SBudgetCalculatorService {
 
     /**
      * 
-     * This method returns the final version of {@link BudgetDocument} for a given {@link ProposalDevelopmentDocument}
-     * 
-     * @param pdDoc Proposal development document.
-     * @return BudgetDocument final version of budget corresponding to the ProposalDevelopmentDocument object.
-     * @throws S2SException
-     */
-    public BudgetDocument getFinalBudgetVersion(ProposalDevelopmentDocument pdDoc) throws S2SException;
-
-    /**
-     * 
-     * This method gets the salary requested for a given proposal person.
-     * 
-     * @param pdDoc {@link ProposalDevelopmentDocument} from which salary needs to be fetched
-     * @param proposalPerson proposal person whose salary needs to be fetched
-     * 
-     * @return {@link BudgetDecimal} salary of proposal person
-     * @throws S2SException
-     */
-    public BudgetDecimal getProposalPersonSalary(ProposalDevelopmentDocument pdDoc, ProposalPerson proposalPerson)
-            throws S2SException;
-
-    /**
-     * 
      * This method determines whether a {@link ProposalPerson} is a Non MIT person
      * 
      * @param proposalPerson ProposalPerson.
@@ -111,5 +89,7 @@ public interface S2SBudgetCalculatorService {
      * @return IndirectCostInfo for the corresponding BudgetPeriod object.
      */
     public IndirectCostInfo getIndirectCosts(Budget budget,BudgetPeriod budgetPeriod);
+
+    public ScaleTwoDecimal getBaseSalaryByPeriod(Long budgetId, int budgetPeriod, KeyPersonInfo keyPerson );
 
 }

@@ -37,28 +37,28 @@ import org.kuali.coeus.common.framework.person.KcPerson;
 import org.kuali.coeus.common.framework.person.KcPersonService;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
 import org.kuali.coeus.common.framework.sponsor.Sponsor;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.propdev.impl.ynq.ProposalYnq;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.bo.*;
-import org.kuali.kra.budget.BudgetDecimal;
 import org.kuali.kra.budget.core.Budget;
 import org.kuali.kra.budget.distributionincome.BudgetProjectIncome;
 import org.kuali.kra.budget.document.BudgetDocument;
 import org.kuali.kra.budget.nonpersonnel.BudgetLineItem;
 import org.kuali.kra.budget.nonpersonnel.BudgetLineItemCalculatedAmount;
 import org.kuali.kra.budget.parameters.BudgetPeriod;
-import org.kuali.kra.institutionalproposal.service.InstitutionalProposalService;
 import org.kuali.kra.proposaldevelopment.bo.*;
 import org.kuali.kra.proposaldevelopment.budget.modular.BudgetModularIdc;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.questionnaire.QuestionnaireQuestion;
 import org.kuali.kra.questionnaire.answer.Answer;
 import org.kuali.kra.questionnaire.answer.AnswerHeader;
 import org.kuali.kra.s2s.S2SException;
-import org.kuali.kra.s2s.bo.S2sOpportunity;
+import org.kuali.coeus.propdev.impl.s2s.S2sOpportunity;
+import org.kuali.kra.s2s.depend.ArgValueLookupService;
 import org.kuali.kra.s2s.generator.bo.DepartmentalPerson;
 import org.kuali.kra.s2s.generator.impl.RRSF424BaseGenerator;
 import org.kuali.kra.s2s.util.S2SConstants;
-import org.kuali.rice.krad.service.BusinessObjectService;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -87,7 +87,7 @@ public class RRSF424_2_0_V2Generator extends RRSF424BaseGenerator {
 				.newInstance();
 		RRSF42420 rrsf42420 = RRSF42420.Factory.newInstance();
 		rrsf42420.setFormVersion(S2SConstants.FORMVERSION_2_0);
-		rrsf42420.setSubmittedDate(s2sUtilService.getCurrentCalendar());
+		rrsf42420.setSubmittedDate(Calendar.getInstance());
 		if(getSubmissionTypeCode() != null){
 		    rrsf42420.setSubmissionTypeCode(SubmissionTypeDataType.Enum.forInt(Integer.parseInt(getSubmissionTypeCode())));
 		}
@@ -119,7 +119,7 @@ public class RRSF424_2_0_V2Generator extends RRSF424BaseGenerator {
 		rrsf42420.setStateReview(getStateReview());
 		rrsf42420.setAORInfo(getAORInfoType());
 		rrsf42420.setAORSignature(getAORSignature());
-		rrsf42420.setAORSignedDate(s2sUtilService.getCurrentCalendar());
+		rrsf42420.setAORSignedDate(Calendar.getInstance());
 		setPreApplicationAttachment(rrsf42420);
 		setSFLLLAttachment(rrsf42420);
 		setCoverLetterAttachment(rrsf42420);
@@ -145,7 +145,7 @@ public class RRSF424_2_0_V2Generator extends RRSF424BaseGenerator {
 		funding.setEstimatedProgramIncome(BigDecimal.ZERO);
 		boolean hasBudgetLineItem = false;
 		try {
-			budgetDoc = s2sBudgetCalculatorService.getFinalBudgetVersion(pdDoc);
+			budgetDoc = proposalBudgetService.getFinalBudgetVersion(pdDoc);
 		} catch (Exception e) {
 			LOG.error("Error while fetching Budget document", e);
 			return funding;
@@ -156,9 +156,9 @@ public class RRSF424_2_0_V2Generator extends RRSF424BaseGenerator {
 		}
 		if (budget != null) {
 			if (budget.getModularBudgetFlag()) {
-				BudgetDecimal fundsRequested = BudgetDecimal.ZERO;
-				BudgetDecimal totalDirectCost = BudgetDecimal.ZERO;
-				BudgetDecimal totalCost = BudgetDecimal.ZERO;
+				ScaleTwoDecimal fundsRequested = ScaleTwoDecimal.ZERO;
+				ScaleTwoDecimal totalDirectCost = ScaleTwoDecimal.ZERO;
+				ScaleTwoDecimal totalCost = ScaleTwoDecimal.ZERO;
 				// get modular budget amounts instead of budget detail amounts
 				for (BudgetPeriod budgetPeriod : budget.getBudgetPeriods()) {
 					totalDirectCost = totalDirectCost.add(budgetPeriod
@@ -175,8 +175,8 @@ public class RRSF424_2_0_V2Generator extends RRSF424BaseGenerator {
 				budget.setTotalCost(totalCost);
 			}
 
-			BudgetDecimal fedNonFedCost = budget.getTotalCost();
-			BudgetDecimal costSharingAmount = BudgetDecimal.ZERO;
+			ScaleTwoDecimal fedNonFedCost = budget.getTotalCost();
+			ScaleTwoDecimal costSharingAmount = ScaleTwoDecimal.ZERO;
 
 			for (BudgetPeriod budgetPeriod : budget.getBudgetPeriods()) {
                 for (BudgetLineItem lineItem : budgetPeriod.getBudgetLineItems()) {
@@ -406,7 +406,7 @@ public class RRSF424_2_0_V2Generator extends RRSF424BaseGenerator {
 	    if (answer !=null && answer.equals(YesNoDataType.Y_YES)) {
 	        String answerExplanation = getAnswer(ANSWER_111);
 	        if (answerExplanation != null) {
-	            Collection<ArgValueLookup> argDescription = KcServiceLocator.getService(BusinessObjectService.class).findAll(ArgValueLookup.class);
+	            Collection<ArgValueLookup> argDescription = KcServiceLocator.getService(ArgValueLookupService.class).findAllArgValueLookups();
 	            if (argDescription != null) {
 	                for (ArgValueLookup argValue : argDescription) {
 	                    if (argValue.getValue().equals(answerExplanation)) {

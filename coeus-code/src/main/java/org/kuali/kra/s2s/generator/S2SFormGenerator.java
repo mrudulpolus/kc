@@ -16,10 +16,10 @@
 package org.kuali.kra.s2s.generator;
 
 import org.apache.xmlbeans.XmlObject;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.kra.s2s.S2SException;
 import org.kuali.kra.s2s.generator.bo.AttachmentData;
-import org.kuali.rice.kns.util.AuditError;
+import org.kuali.kra.s2s.util.AuditError;
 
 import java.util.List;
 
@@ -51,17 +51,6 @@ public interface S2SFormGenerator {
     
     /**
      * 
-     * This method creates an XML document using the APIs generated using XMLBEans by compiling the form's schema and returns it
-     * as XmlObject.
-     * 
-     * @param xmlObject
-     * @return XmlObject
      */
-    
-//    public XmlObject getFormObject(XmlObject xmlObject);
-    
-    /**
-     * 
-     */
-    public List<AuditError> getAuditErrors(); 
+    public List<AuditError> getAuditErrors();
 }

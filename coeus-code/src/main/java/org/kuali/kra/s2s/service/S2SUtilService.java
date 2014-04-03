@@ -15,13 +15,13 @@
  */
 package org.kuali.kra.s2s.service;
 
-import org.kuali.kra.budget.BudgetDecimal;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.kra.budget.personnel.BudgetPersonnelDetails;
 import org.kuali.kra.infrastructure.CitizenshipTypes;
 import org.kuali.kra.institutionalproposal.home.InstitutionalProposal;
 import org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.questionnaire.answer.Answer;
 import org.kuali.kra.s2s.generator.bo.DepartmentalPerson;
 import org.kuali.kra.s2s.generator.bo.KeyPersonInfo;
@@ -46,7 +46,7 @@ public interface S2SUtilService {
 	 * 
 	 * This method creates and returns Map of submission details like submission
 	 * type, description and Revision code
-	 * 
+	 *
 	 * @param pdDoc
 	 *            Proposal Development Document.
 	 * @return Map<String, String> Map of submission details.
@@ -55,7 +55,7 @@ public interface S2SUtilService {
 			ProposalDevelopmentDocument pdDoc);
 
 	/**
-	 * 
+	 *
 	 * This method populates and returns the Departmental Person object for a
 	 * given proposal document
 	 * 
@@ -96,60 +96,27 @@ public interface S2SUtilService {
 	 */
 	public List<ProposalPerson> getNKeyPersons(List<ProposalPerson> keyPersons,
 			boolean firstN, int n);
-	/**
-	 * 
-	 * This method returns the Federal ID for a given proposal
-	 * 
-	 * @param proposalDevelopmentDocument
-	 *            Proposal Development Document.
-	 * @return Federal ID for a given proposal.
-	 */
-	public String getFederalId(
-			ProposalDevelopmentDocument proposalDevelopmentDocument);
-	
-	/**
-	 * Get the tracking id from the newest development proposal linked to the
-	 * institutional proposal.
-	 * @param proposal
-	 * @return
-	 */
-	String getGgTrackingIdFromProposal(InstitutionalProposal proposal);
-	
-	/**
-	 * 
-	 * This method fetches system constant parameters
-	 * 
-	 * @param parameter
-	 *            String for which value must be fetched
-	 * @return String System constant parameters.
-	 */
-	public String getParameterValue(String parameter);
-	/**
-	 * 
-	 * This method returns a {@link Calendar} whose date matches the date passed
-	 * as {@link String}
-	 * 
-	 * @param dateStr
-	 *            string for which the Calendar value has to be found.
-	 * @return Calendar calendar value corresponding to the date string.
-	 */
-	public Calendar convertDateStringToCalendar(String dateStr);
-	/**
-	 * 
-	 * This method is used to get current Calendar
-	 * 
-	 * @return {@link Calendar}
-	 */
-	public Calendar getCurrentCalendar();
-	/**
-	 * 
-	 * This method is used to get Calendar date
-	 * 
-	 * @param date(Date)
-	 *            date for which Calendar value has to be found.
-	 * @return cal(Calendar) calendar value corresponding to the date.
-	 */
-	public Calendar convertDateToCalendar(Date date);
+
+    /**
+     *
+     * This method returns a {@link Calendar} whose date matches the date passed
+     * as {@link String}
+     *
+     * @param dateStr
+     *            string for which the Calendar value has to be found.
+     * @return Calendar calendar value corresponding to the date string.
+     */
+    public Calendar convertDateStringToCalendar(String dateStr);
+
+    /**
+     *
+     * This method is used to get Calendar date
+     *
+     * @param date(Date)
+     *            date for which Calendar value has to be found.
+     * @return cal(Calendar) calendar value corresponding to the date.
+     */
+    public Calendar convertDateToCalendar(Date date);
 	/**
 	 * 
 	 * This method is to get division name using the OwnedByUnit and traversing
@@ -180,27 +147,12 @@ public interface S2SUtilService {
 	public Country getCountryFromCode(String countryCode);
 	/**
 	 * Finds a State object from the state name
-	 * @param default country 3-character code
+	 * @param countryAlternateCode country 3-character code
 	 * @param stateName
 	 *            Name of the state (two-letter state code)
 	 * @return State object matching the name.
 	 */
 	public State getStateFromName(String countryAlternateCode, String stateName);
-	/**
-	 * 
-	 * This method compares a proposal person with budget person. It checks
-	 * whether the proposal person is from PERSON or ROLODEX and matches the
-	 * respective person ID with the person in {@link BudgetPersonnelDetails}
-	 * 
-	 * @param proposalPerson -
-	 *            key person from proposal
-	 * @param budgetPersonnelDetails
-	 *            person from BudgetPersonnelDetails
-	 * @return true if persons match, false otherwise
-	 */
-	public boolean proposalPersonEqualsBudgetPerson(
-			ProposalPerson proposalPerson,
-			BudgetPersonnelDetails budgetPersonnelDetails);
 
 	/**
 	 * 
@@ -217,54 +169,20 @@ public interface S2SUtilService {
 	public boolean keyPersonEqualsBudgetPerson(KeyPersonInfo keyPersonInfo,
 			BudgetPersonnelDetails budgetPersonnelDetails);
 
-	/**
-	 * 
-	 * This method is used to get the property from configuration file. If there
-	 * is no value defined, it returns defaultValue
-	 * 
-	 * @param key
-	 * @return value
-	 */
-	public String getProperty(String key);
-
-	/**
-	 * This method converts String objects in the String array into a String
-	 * separated by commas and returns it.
-	 * 
-	 * @param stringArray
-	 * @return String created from StringArray
-	 */
-	public String convertStringArrayToString(String[] stringArray);
-	
-	/**
-	 * 
-	 * Converts String objects in a list into a String separated by commas
-	 * @param stringList
-	 * @return
-	 */
-	public String convertStringListToString(List<String> stringList);	
-
-	/**
+    /**
 	 * Finds all the Questionnaire Answers associates with provided
 	 * ProposalNumber and questionnaireId.
 	 * 
-	 * @param DevelopmentProposal
+	 * @param developmentProposal
 	 * @param namespace
 	 * @param formname
 	 * @return List of Questionnaire {@link Answer}.
 	 */
     public List<Answer> getQuestionnaireAnswers(DevelopmentProposal developmentProposal,String namespace,String formname);
-    /**
-     * 
-     * This method gets the answers from a questionnaire for a proposal person.
-     * @param pdDoc
-     * @param proposalPerson
-     * @return
-     */
-    public List<Answer> getQuestionnaireAnswersForPI(ProposalDevelopmentDocument pdDoc);
+
 	/**
 	 * Finds all the co-investigators associated with the provided pdDoc.
-	 * @param ProposalDevelopmentDocument
+	 * @param pdDoc
 	 * @return List of Co-Investigators {@link ProposalPerson}.
 	 */
 	
@@ -272,7 +190,7 @@ public interface S2SUtilService {
 	
 	/**
 	 * Finds all the key Person associated with the provided pdDoc.
-	 * @param ProposalDevelopmentDocument
+	 * @param pdDoc
 	 * @return List of Key Persons {@link ProposalPerson}.
 	 */
 	
@@ -284,7 +202,6 @@ public interface S2SUtilService {
      * 
      * @param pdDoc(ProposalDevelopmentDocument)
      *            proposal development document.
-     * @param contactType(String)
      *            for which the DepartmentalPerson has to be found.
      * @return depPerson(DepartmentalPerson) corresponding to the contact type.
      */
@@ -293,21 +210,11 @@ public interface S2SUtilService {
     /**
      * 
      * This method is used to delete all auto generated pdfs as part of s2s forms creation
-     * @param ProposalDevelopmentDocument
+     * @param pdDoc
      */
     public void deleteSystemGeneratedAttachments(ProposalDevelopmentDocument pdDoc);
     
-    public BudgetDecimal getNumberOfMonths(Date dateStart, Date dateEnd);
-    /**
-     * 
-     * This method gets the Federal Agency for the given
-     * {@link DevelopmentProposal}
-     * 
-     * @param pdDoc
-     *            Proposal Development Document.
-     * @return {@link String} Federal Agency
-     */
-    public String getCognizantFedAgency(DevelopmentProposal developmentProposal);
+    public ScaleTwoDecimal getNumberOfMonths(Date dateStart, Date dateEnd);
 
     /**
      * 

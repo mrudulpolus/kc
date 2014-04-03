@@ -25,4 +25,6 @@
 		<property name="render" value="@{#view.renderReturnLink}" />
 		<property name="additionalCssClasses" value="btn,btn-primary,btn-xs" />
 	</bean>
+	<bean id="Uif-DropdownControl" parent="Uif-DropdownControl-parentBean"
+		p:additionalCssClasses="advanced_select"/>
 </beans>

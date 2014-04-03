@@ -18,8 +18,10 @@ import org.kuali.coeus.common.framework.org.OrganizationYnq;
 import org.kuali.coeus.common.framework.person.KcPerson;
 import org.kuali.coeus.common.framework.person.KcPersonService;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
+import org.kuali.coeus.common.framework.sponsor.SponsorService;
+import org.kuali.coeus.propdev.impl.ynq.ProposalYnq;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.kra.budget.BudgetDecimal;
 import org.kuali.kra.budget.calculator.RateClassType;
 import org.kuali.kra.budget.core.Budget;
 import org.kuali.kra.budget.core.BudgetCategoryMap;
@@ -32,16 +34,11 @@ import org.kuali.kra.infrastructure.Constants;
 import org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
 import org.kuali.kra.proposaldevelopment.bo.ProposalSite;
-import org.kuali.kra.proposaldevelopment.bo.ProposalYnq;
 import org.kuali.kra.proposaldevelopment.specialreview.ProposalSpecialReview;
-import org.kuali.kra.s2s.generator.bo.CompensationInfo;
-import org.kuali.kra.s2s.generator.bo.KeyPersonInfo;
-import org.kuali.kra.s2s.service.S2SUtilService;
-import org.kuali.kra.s2s.util.S2SConstants;
-import org.kuali.kra.service.SponsorService;
 import org.kuali.rice.krad.service.BusinessObjectService;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Date;
 import java.util.*;
 
@@ -94,9 +91,10 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
     private static final String KEYPERSON_OTHER = "Other (Specify)";
     private static final String APPOINTMENT_TYPE_SUM_EMPLOYEE = "SUM EMPLOYEE";
     private static final String APPOINTMENT_TYPE_TMP_EMPLOYEE = "TMP EMPLOYEE";
+    public static final String VALUE_UNKNOWN = "Unknown";
     private BusinessObjectService businessObjectService;
     private KcPersonService kcPersonService;
-    private S2SUtilService s2SUtilService;
+    private BudgetPersonService budgetPersonService;
 
     /*
      * This method will set the values to animal subject attributes like
@@ -168,7 +166,7 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
      * This method gets BudgetTotalType XMLObject by setting data from totalCost and costSharingAmount to BudgetTotalType for
      * budgetPeriod and budget
      */
-    protected BudgetTotalsType getBudgetTotals(BudgetDecimal totalCost, BudgetDecimal costSharingAmount) {
+    protected BudgetTotalsType getBudgetTotals(ScaleTwoDecimal totalCost, ScaleTwoDecimal costSharingAmount) {
         BudgetTotalsType budgetTotalType = BudgetTotalsType.Factory.newInstance();
         budgetTotalType.setFederalCost(totalCost.bigDecimalValue());
         budgetTotalType.setApplicantCost(costSharingAmount.bigDecimalValue());
@@ -270,7 +268,7 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
      * budgetLineItem
      */
     protected BigDecimal getTravelTotal(List<BudgetLineItem> budgetLineItems) {
-        BudgetDecimal cost = BudgetDecimal.ZERO;
+        ScaleTwoDecimal cost = ScaleTwoDecimal.ZERO;
         for (BudgetLineItem budgetLineItem : budgetLineItems) {
             if (isBudgetCategoryTravel(budgetLineItem)) {
                 cost = cost.add(budgetLineItem.getLineItemCost());
@@ -568,7 +566,7 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
      * rateClassType as Vacation and Employee Benefit
      */
     protected BigDecimal getSalaryWagesTotal(List<BudgetLineItem> budgetLineItems) {
-        BudgetDecimal salaryAndWagesTotal = BudgetDecimal.ZERO;
+        ScaleTwoDecimal salaryAndWagesTotal = ScaleTwoDecimal.ZERO;
         for (BudgetLineItem budgetLineItem : budgetLineItems) {
             for (BudgetPersonnelDetails budgetPersDetails : budgetLineItem.getBudgetPersonnelDetailsList()) {
                 salaryAndWagesTotal = salaryAndWagesTotal.add(getSalaryWagesTotalForLineItem(budgetPersDetails));
@@ -581,8 +579,8 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
      * This method gets SalaryAndWages amount from List of BudgetPersonnelRateAndBase as sum of salaryRequested and CalculatedCost
      * by checking the rateClassType for vacation and employee benefit
      */
-    private BudgetDecimal getSalaryWagesTotalForLineItem(BudgetPersonnelDetails budgetPersDetails) {
-        BudgetDecimal salaryAndWages = BudgetDecimal.ZERO;
+    private ScaleTwoDecimal getSalaryWagesTotalForLineItem(BudgetPersonnelDetails budgetPersDetails) {
+        ScaleTwoDecimal salaryAndWages = ScaleTwoDecimal.ZERO;
         salaryAndWages = salaryAndWages.add(budgetPersDetails.getSalaryRequested());
         salaryAndWages = salaryAndWages.add(getFringeCost(budgetPersDetails));
         return salaryAndWages;
@@ -591,8 +589,8 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
     /*
      * This method gets the fringe amount from List of BudgetPersonnelRateAndBase
      */
-    protected BudgetDecimal getFringeCost(BudgetPersonnelDetails budgetPersDetails) {
-        BudgetDecimal fringe = BudgetDecimal.ZERO;
+    protected ScaleTwoDecimal getFringeCost(BudgetPersonnelDetails budgetPersDetails) {
+        ScaleTwoDecimal fringe = ScaleTwoDecimal.ZERO;
         for (BudgetPersonnelRateAndBase budgetPersRateBase : budgetPersDetails.getBudgetPersonnelRateAndBaseList()) {
             if (isRateAndBaseOfRateClassTypeEB(budgetPersRateBase) || isRateAndBaseOfRateClassTypeVacation(budgetPersRateBase)) {
                 fringe = fringe.add(budgetPersRateBase.getCalculatedCost());
@@ -601,8 +599,8 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
         return fringe;
     }
 
-    protected BudgetDecimal getTotalSalaryRequested(BudgetPeriod budgetPeriod) {
-        BudgetDecimal salary = BudgetDecimal.ZERO;
+    protected ScaleTwoDecimal getTotalSalaryRequested(BudgetPeriod budgetPeriod) {
+        ScaleTwoDecimal salary = ScaleTwoDecimal.ZERO;
         List<BudgetLineItem> lineItems = budgetPeriod.getBudgetLineItems();
         for (BudgetLineItem budgetLineItem : lineItems) {
             List<BudgetPersonnelDetails> persDetailsList = budgetLineItem.getBudgetPersonnelDetailsList();
@@ -613,8 +611,8 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
         return salary;
     }
 
-    protected BudgetDecimal getTotalFringe(BudgetPeriod budgetPeriod) {
-        BudgetDecimal fringe = BudgetDecimal.ZERO;
+    protected ScaleTwoDecimal getTotalFringe(BudgetPeriod budgetPeriod) {
+        ScaleTwoDecimal fringe = ScaleTwoDecimal.ZERO;
         List<BudgetLineItem> lineItems = budgetPeriod.getBudgetLineItems();
         for (BudgetLineItem budgetLineItem : lineItems) {
             List<BudgetPersonnelDetails> persDetailsList = budgetLineItem.getBudgetPersonnelDetailsList();
@@ -690,7 +688,7 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
      * paticipantPatient for budgetLineItem
      */
     protected BigDecimal getParticipantPatientTotal(List<BudgetLineItem> budgetLineItems) {
-        BudgetDecimal cost = BudgetDecimal.ZERO;
+        ScaleTwoDecimal cost = ScaleTwoDecimal.ZERO;
         for (BudgetLineItem budgetLineItem : budgetLineItems) {
             if (isBudgetCategoryParticipantPatient(budgetLineItem)) {
                 cost = cost.add(budgetLineItem.getLineItemCost());
@@ -704,7 +702,7 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
      * for budgetLineItem
      */
     protected BigDecimal getOtherDirectTotal(List<BudgetLineItem> budgetLineItems) {
-        BudgetDecimal cost = BudgetDecimal.ZERO;
+        ScaleTwoDecimal cost = ScaleTwoDecimal.ZERO;
         for (BudgetLineItem budgetLineItem : budgetLineItems) {
             if (isBudgetCategoryOther(budgetLineItem)) {
                 cost = cost.add(budgetLineItem.getLineItemCost());
@@ -788,7 +786,7 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
      * for budgetLineItem
      */
     protected BigDecimal getEquipmentTotal(List<BudgetLineItem> budgetLineItems) {
-        BudgetDecimal cost = BudgetDecimal.ZERO;
+        ScaleTwoDecimal cost = ScaleTwoDecimal.ZERO;
         for (BudgetLineItem budgetLineItem : budgetLineItems) {
             if (isBudgetCategoryEquipment(budgetLineItem)) {
                 cost = cost.add(budgetLineItem.getLineItemCost());
@@ -1062,7 +1060,7 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
                 for (BudgetPersonnelDetails budgetPersonnelDetails : lineItem.getBudgetPersonnelDetailsList()) {
                     personAlreadyAdded = false;
                     for (ProposalPerson proposalPerson : developmentProposal.getProposalPersons()) {
-                        if (s2SUtilService.proposalPersonEqualsBudgetPerson(proposalPerson, budgetPersonnelDetails)) {
+                        if (budgetPersonService.proposalPersonEqualsBudgetPerson(proposalPerson, budgetPersonnelDetails)) {
                             personAlreadyAdded = true;
                             break;
                         }
@@ -1134,9 +1132,8 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
                     for (BudgetPersonnelDetails budgetPersonnelDetails : lineItem.getBudgetPersonnelDetailsList()) {
                         personAlreadyAdded = false;
                         for (ProposalPerson proposalPerson : developmentProposal.getProposalPersons()) {
-                            if (s2SUtilService.proposalPersonEqualsBudgetPerson(proposalPerson, budgetPersonnelDetails)) {
+                            if (budgetPersonService.proposalPersonEqualsBudgetPerson(proposalPerson, budgetPersonnelDetails)) {
                                 personAlreadyAdded = true;
-//                                break;
                             }
                         }
                         budgetPersonnelDetails.refreshReferenceObject("budgetPerson");
@@ -1209,8 +1206,8 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
         if (kcPerson != null) {
             keyPerson = new KeyPersonInfo();
             keyPerson.setPersonId(kcPerson.getPersonId());
-            keyPerson.setFirstName(kcPerson.getFirstName() == null ? S2SConstants.VALUE_UNKNOWN : kcPerson.getFirstName());
-            keyPerson.setLastName(kcPerson.getLastName() == null ? S2SConstants.VALUE_UNKNOWN : kcPerson.getLastName());
+            keyPerson.setFirstName(kcPerson.getFirstName() == null ? VALUE_UNKNOWN : kcPerson.getFirstName());
+            keyPerson.setLastName(kcPerson.getLastName() == null ? VALUE_UNKNOWN : kcPerson.getLastName());
             keyPerson.setMiddleName(kcPerson.getMiddleName());
             keyPerson.setNonMITPersonFlag(false);
             keyPerson.setRole(KEYPERSON_OTHER);
@@ -1229,9 +1226,9 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
             String[] tbnNames = tbnPerson.getPersonName().split(" ");
             int nameIndex = 0;
             keyPerson.setPersonId(tbnPerson.getTbnId());
-            keyPerson.setFirstName(tbnNames.length >= 1 ? tbnNames[nameIndex++] : S2SConstants.VALUE_UNKNOWN);
+            keyPerson.setFirstName(tbnNames.length >= 1 ? tbnNames[nameIndex++] : VALUE_UNKNOWN);
             keyPerson.setMiddleName(tbnNames.length >= 3 ? tbnNames[nameIndex++] : " ");
-            keyPerson.setLastName(tbnNames.length >= 2 ? tbnNames[nameIndex++] : S2SConstants.VALUE_UNKNOWN);
+            keyPerson.setLastName(tbnNames.length >= 2 ? tbnNames[nameIndex++] : VALUE_UNKNOWN);
             keyPerson.setRole(tbnPerson.getPersonName());
             keyPerson.setNonMITPersonFlag(false);
         }
@@ -1251,8 +1248,8 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
     private KeyPersonInfo getKeyPeronInfo(Rolodex rolodexPerson) {
         KeyPersonInfo keyPerson = new KeyPersonInfo();
         keyPerson.setRolodexId(rolodexPerson.getRolodexId());
-        keyPerson.setFirstName(rolodexPerson.getFirstName() == null ? S2SConstants.VALUE_UNKNOWN : rolodexPerson.getFirstName());
-        keyPerson.setLastName(rolodexPerson.getLastName() == null ? S2SConstants.VALUE_UNKNOWN : rolodexPerson.getLastName());
+        keyPerson.setFirstName(rolodexPerson.getFirstName() == null ? VALUE_UNKNOWN : rolodexPerson.getFirstName());
+        keyPerson.setLastName(rolodexPerson.getLastName() == null ? VALUE_UNKNOWN : rolodexPerson.getLastName());
         keyPerson.setMiddleName(rolodexPerson.getMiddleName());
         keyPerson.setRole(StringUtils.isNotBlank(rolodexPerson.getTitle()) ? rolodexPerson.getTitle() : KEYPERSON_OTHER);
         keyPerson.setNonMITPersonFlag(true);
@@ -1293,31 +1290,31 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
             CompensationInfo compensationInfo) {
         for (BudgetLineItem lineItem : budgetPeriod.getBudgetLineItems()) {
             for (BudgetPersonnelDetails personDetails : lineItem.getBudgetPersonnelDetailsList()) {
-                if (s2SUtilService.keyPersonEqualsBudgetPerson(keyPerson, personDetails)) {
-                    BudgetDecimal numberOfMonths = s2SUtilService.getNumberOfMonths(personDetails.getStartDate(), personDetails.getEndDate());
+                if (keyPersonEqualsBudgetPerson(keyPerson, personDetails)) {
+                    BigDecimal numberOfMonths = getNumberOfMonths(personDetails.getStartDate(), personDetails.getEndDate()).bigDecimalValue();
                     if (personDetails.getPeriodTypeCode().equals(PERIOD_TYPE_ACADEMIC_MONTHS)) {
-                        BudgetDecimal academicMonths = personDetails.getPercentEffort().multiply(numberOfMonths).multiply(new BudgetDecimal(0.01));
+                        BigDecimal academicMonths = personDetails.getPercentEffort().bigDecimalValue().multiply(numberOfMonths).multiply(new ScaleTwoDecimal(0.01).bigDecimalValue());
                         if (lineItem.getBudgetCategoryCode().equals(SENIOR_PERSONNEL_CATEGORY_CODE)) {
-                            compensationInfo.setAcademicMonths(compensationInfo.getAcademicMonths().add(academicMonths));
+                            compensationInfo.setAcademicMonths(compensationInfo.getAcademicMonths().add(new ScaleTwoDecimal(academicMonths)));
                         }
                     }
                     else if (personDetails.getPeriodTypeCode().equals(PERIOD_TYPE_SUMMER_MONTHS)) {
-                        BudgetDecimal summerMonths = personDetails.getPercentEffort().multiply(numberOfMonths).multiply(new BudgetDecimal(0.01));
+                        BigDecimal summerMonths = personDetails.getPercentEffort().bigDecimalValue().multiply(numberOfMonths).multiply(new ScaleTwoDecimal(0.01).bigDecimalValue());
                         if (lineItem.getBudgetCategoryCode().equals(SENIOR_PERSONNEL_CATEGORY_CODE)) {
-                            compensationInfo.setSummerMonths(compensationInfo.getSummerMonths().add(summerMonths));
+                            compensationInfo.setSummerMonths(compensationInfo.getSummerMonths().add(new ScaleTwoDecimal(summerMonths)));
                         }
                     }
                     else {
-                        BudgetDecimal calendarMonths = personDetails.getPercentEffort().multiply(numberOfMonths).multiply(new BudgetDecimal(0.01));
+                        BigDecimal calendarMonths = personDetails.getPercentEffort().bigDecimalValue().multiply(numberOfMonths).multiply(new ScaleTwoDecimal(0.01).bigDecimalValue());
                         if (lineItem.getBudgetCategoryCode().equals(SENIOR_PERSONNEL_CATEGORY_CODE)) {
-                            compensationInfo.setCalendarMonths(compensationInfo.getCalendarMonths().add(calendarMonths));
+                            compensationInfo.setCalendarMonths(compensationInfo.getCalendarMonths().add(new ScaleTwoDecimal(calendarMonths)));
                         }
                     }
-                    BudgetDecimal totalSal = personDetails.getSalaryRequested();
+                    ScaleTwoDecimal totalSal = personDetails.getSalaryRequested();
                     if (lineItem.getBudgetCategoryCode().equals(SENIOR_PERSONNEL_CATEGORY_CODE)) {
                         compensationInfo.setRequestedSalary(compensationInfo.getRequestedSalary().add(totalSal));
                     }
-                    BudgetDecimal totalSalCostSharing = personDetails.getCostSharingAmount();
+                    ScaleTwoDecimal totalSalCostSharing = personDetails.getCostSharingAmount();
                     compensationInfo.setCostSharingAmount(compensationInfo.getCostSharingAmount().add(totalSalCostSharing));
                     for (BudgetPersonnelCalculatedAmount personCalculatedAmt : personDetails.getBudgetPersonnelCalculatedAmounts()) {
                         personCalculatedAmt.refreshReferenceObject("rateClass");
@@ -1325,9 +1322,9 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
                                 .getRateTypeCode().equals(RATE_TYPE_SUPPORT_STAFF_SALARIES))
                                 || (personCalculatedAmt.getRateClass().getRateClassType().equals(RATE_CLASS_TYPE_VACATION) && !personCalculatedAmt
                                         .getRateTypeCode().equals(RATE_TYPE_ADMINISTRATIVE_SALARIES))) {
-                            BudgetDecimal fringe = personCalculatedAmt.getCalculatedCost();
+                            ScaleTwoDecimal fringe = personCalculatedAmt.getCalculatedCost();
                             compensationInfo.setFringe(compensationInfo.getFringe().add(fringe));
-                            BudgetDecimal fringeCostSharing = personCalculatedAmt.getCalculatedCostSharing();
+                            ScaleTwoDecimal fringeCostSharing = personCalculatedAmt.getCalculatedCostSharing();
                             compensationInfo.setFringeCostSharing(compensationInfo.getFringeCostSharing().add(fringeCostSharing));
                         }
                     }
@@ -1346,6 +1343,26 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
         }
         compensationInfo.setFundsRequested(compensationInfo.getRequestedSalary().add(compensationInfo.getFringe()));
         compensationInfo.setNonFundsRequested(compensationInfo.getCostSharingAmount().add(compensationInfo.getFringeCostSharing()));
+    }
+
+    /**
+     * This method compares a key person with budget person. It checks whether the key person is from PERSON or ROLODEX and matches
+     * the respective person ID with the person in {@link BudgetPersonnelDetails}
+     *
+     * @param keyPersonInfo - key person to compare
+     * @param budgetPersonnelDetails person from BudgetPersonnelDetails
+     * @return true if persons match, false otherwise
+     */
+    public boolean keyPersonEqualsBudgetPerson(KeyPersonInfo keyPersonInfo, BudgetPersonnelDetails budgetPersonnelDetails) {
+        boolean equal = false;
+        if (keyPersonInfo != null && budgetPersonnelDetails != null) {
+            String budgetPersonId = budgetPersonnelDetails.getPersonId();
+            if ((keyPersonInfo.getPersonId() != null && keyPersonInfo.getPersonId().equals(budgetPersonId))
+                    || (keyPersonInfo.getRolodexId() != null && keyPersonInfo.getRolodexId().toString().equals(budgetPersonId))) {
+                equal = true;
+            }
+        }
+        return equal;
     }
 
     /**
@@ -1384,21 +1401,11 @@ public abstract class AbstractResearchAndRelatedStream extends ProposalBaseStrea
         this.kcPersonService = kcPersonService;
     }
 
-    /**
-     * Gets the s2SUtilService attribute.
-     * 
-     * @return Returns the s2SUtilService.
-     */
-    public S2SUtilService getS2SUtilService() {
-        return s2SUtilService;
+    public BudgetPersonService getBudgetPersonService() {
+        return budgetPersonService;
     }
 
-    /**
-     * Sets the s2SUtilService attribute value.
-     * 
-     * @param utilService The s2SUtilService to set.
-     */
-    public void setS2SUtilService(S2SUtilService utilService) {
-        s2SUtilService = utilService;
+    public void setBudgetPersonService(BudgetPersonService budgetPersonService) {
+        this.budgetPersonService = budgetPersonService;
     }
 }

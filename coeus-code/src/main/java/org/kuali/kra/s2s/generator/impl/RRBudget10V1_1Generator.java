@@ -33,13 +33,13 @@ import gov.grants.apply.system.attachmentsV10.AttachedFileDataType.FileLocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlbeans.XmlObject;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.kra.budget.BudgetDecimal;
 import org.kuali.kra.budget.core.BudgetService;
 import org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal;
 import org.kuali.kra.proposaldevelopment.bo.Narrative;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.s2s.S2SException;
 import org.kuali.kra.s2s.generator.bo.*;
 import org.kuali.kra.s2s.util.S2SConstants;
@@ -302,7 +302,7 @@ public class RRBudget10V1_1Generator extends RRBudgetBaseGenerator {
     private Other getOtherPTSupportCosts(BudgetPeriodInfo periodInfo) {
         Other other = Other.Factory.newInstance();
         other.setDescription(OTHERCOST_DESCRIPTION);
-        BudgetDecimal otherCost = BudgetDecimal.ZERO;
+        ScaleTwoDecimal otherCost = ScaleTwoDecimal.ZERO;
         if (periodInfo != null && periodInfo.getpartOtherCost() != null) {
             otherCost = periodInfo.getpartOtherCost();
         }
@@ -436,7 +436,7 @@ public class RRBudget10V1_1Generator extends RRBudgetBaseGenerator {
      * OtherDirectCosts details in BudgetYearDataType based on BudgetPeriodInfo
      * for the RRBudget10.
      * 
-     * @param OtherDirectCosts otherDirectCosts xmlObject
+     * @param otherDirectCosts otherDirectCosts xmlObject
      * @param periodInfo
      *            (BudgetPeriodInfo) budget period entry.
      */
@@ -497,7 +497,7 @@ public class RRBudget10V1_1Generator extends RRBudgetBaseGenerator {
                 && periodInfo.getEquipment().size() > 0) {
             // Evaluating Equipments.
             List<EquipmentList> equipmentArrayList = new ArrayList<EquipmentList>();
-            BudgetDecimal totalFund = BudgetDecimal.ZERO;
+            ScaleTwoDecimal totalFund = ScaleTwoDecimal.ZERO;
             for (CostInfo costInfo : periodInfo.getEquipment().get(0)
                     .getEquipmentList()) {
                 EquipmentList equipmentList = EquipmentList.Factory.newInstance();
@@ -511,7 +511,7 @@ public class RRBudget10V1_1Generator extends RRBudgetBaseGenerator {
 
             // Evaluating Extra Equipments.
             List<CostInfo> extraEquipmentArrayList = new ArrayList<CostInfo>();
-            BudgetDecimal totalExtraEquipFund = BudgetDecimal.ZERO;
+            ScaleTwoDecimal totalExtraEquipFund = ScaleTwoDecimal.ZERO;
             for(CostInfo costInfo:periodInfo.getEquipment().get(0).getExtraEquipmentList()){
                 extraEquipmentArrayList.add(costInfo);
                 totalExtraEquipFund = totalExtraEquipFund.add(costInfo.getCost());
@@ -763,9 +763,9 @@ public class RRBudget10V1_1Generator extends RRBudgetBaseGenerator {
     private KeyPersons getKeyPersons(BudgetPeriodInfo periodInfo) {
 
         KeyPersons keyPersons = KeyPersons.Factory.newInstance();
-        BudgetDecimal extraFunds = BudgetDecimal.ZERO;
+        ScaleTwoDecimal extraFunds = ScaleTwoDecimal.ZERO;
         BudgetService budgetService = KcServiceLocator.getService(BudgetService.class);
-        BudgetDecimal baseSalaryByPeriod; 
+        ScaleTwoDecimal baseSalaryByPeriod;
 
         if (periodInfo != null) {
             if (periodInfo.getKeyPersons() != null) {
@@ -794,7 +794,7 @@ public class RRBudget10V1_1Generator extends RRBudgetBaseGenerator {
                         keyPersonDataType.setProjectRole(keyPerson.getRole());
                     }
                         if (pdDoc.getBudgetDocumentVersions() != null) {
-                            baseSalaryByPeriod = budgetService.getBaseSalaryByPeriod(pdDoc.getBudgetDocumentVersion(0)
+                            baseSalaryByPeriod = s2sBudgetCalculatorService.getBaseSalaryByPeriod(pdDoc.getBudgetDocumentVersion(0)
                                     .getBudgetVersionOverview().getBudgetId(), periodInfo.getBudgetPeriod(), keyPerson);
                             if (baseSalaryByPeriod != null) {
                                 keyPersonDataType.setBaseSalary(baseSalaryByPeriod.bigDecimalValue());

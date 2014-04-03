@@ -18,10 +18,11 @@ package org.kuali.kra.budget.core;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.award.budget.AwardBudgetExt;
 import org.kuali.kra.award.budget.document.AwardBudgetDocument;
-import org.kuali.kra.budget.BudgetDecimal;
 import org.kuali.kra.budget.calculator.QueryList;
 import org.kuali.kra.budget.calculator.RateClassType;
 import org.kuali.kra.budget.calculator.query.Equals;
@@ -46,8 +47,6 @@ import org.kuali.kra.infrastructure.Constants;
 import org.kuali.kra.infrastructure.KeyConstants;
 import org.kuali.kra.proposaldevelopment.budget.bo.BudgetSubAwardPeriodDetail;
 import org.kuali.kra.proposaldevelopment.budget.modular.BudgetModular;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
-import org.kuali.kra.s2s.generator.bo.KeyPersonInfo;
 import org.kuali.kra.service.FiscalYearMonthService;
 import org.kuali.rice.core.api.util.KeyValue;
 import org.kuali.rice.core.web.format.FormatException;
@@ -585,13 +584,13 @@ public class BudgetServiceImpl<T extends BudgetParent> implements BudgetService<
             for ( int i = 1 ; i < oldBudgetPeriods.size(); i++ ) {
                 BudgetPeriod period = oldBudgetPeriods.get(i);
                 period.getBudgetLineItems().clear();
-                period.setCostSharingAmount(new BudgetDecimal(0.0));
-                period.setExpenseTotal(new BudgetDecimal(0.0));
-                period.setTotalCost(new BudgetDecimal(0.0));
-                period.setTotalCostLimit(new BudgetDecimal(0.0));
-                period.setTotalDirectCost(new BudgetDecimal(0.0));
-                period.setTotalIndirectCost(new BudgetDecimal(0.0));
-                period.setUnderrecoveryAmount(new BudgetDecimal(0.0));
+                period.setCostSharingAmount(new ScaleTwoDecimal(0.0));
+                period.setExpenseTotal(new ScaleTwoDecimal(0.0));
+                period.setTotalCost(new ScaleTwoDecimal(0.0));
+                period.setTotalCostLimit(new ScaleTwoDecimal(0.0));
+                period.setTotalDirectCost(new ScaleTwoDecimal(0.0));
+                period.setTotalIndirectCost(new ScaleTwoDecimal(0.0));
+                period.setUnderrecoveryAmount(new ScaleTwoDecimal(0.0));
             }            
             
             /**
@@ -603,10 +602,10 @@ public class BudgetServiceImpl<T extends BudgetParent> implements BudgetService<
                 for ( int i = 1 ; i < budetSubawardPeriodDetail.size(); i++ ) {
                     BudgetSubAwardPeriodDetail period = budetSubawardPeriodDetail.get(i);
                     period.setAmountsModified(true);
-                    period.setCostShare(new BudgetDecimal(0.0));
-                    period.setDirectCost(new BudgetDecimal(0.0));
-                    period.setIndirectCost(new BudgetDecimal(0.0));
-                    period.setTotalCost(new BudgetDecimal(0.0));
+                    period.setCostShare(new ScaleTwoDecimal(0.0));
+                    period.setDirectCost(new ScaleTwoDecimal(0.0));
+                    period.setIndirectCost(new ScaleTwoDecimal(0.0));
+                    period.setTotalCost(new ScaleTwoDecimal(0.0));
                 }
             }
         }
@@ -804,26 +803,7 @@ public class BudgetServiceImpl<T extends BudgetParent> implements BudgetService<
     public void setFiscalYearMonthService(FiscalYearMonthService fiscalYearMonthService) {
         this.fiscalYearMonthService = fiscalYearMonthService;
     }
-    @Override
-    public BudgetDecimal getBaseSalaryByPeriod(Long budgetId, int budgetPeriod, KeyPersonInfo person ) {
-        BusinessObjectService boService = KcServiceLocator.getService(BusinessObjectService.class);
-        final Integer listIndex = 0;
-        BudgetDecimal baseSalaryByPeriod = null;
-        HashMap budgetPersonInPeriodsSalaryMap = new HashMap();
-        budgetPersonInPeriodsSalaryMap.put("budgetId", budgetId);
-        if (person.getPersonId() != null) {
-            budgetPersonInPeriodsSalaryMap.put("personId", person.getPersonId());
-        } else {
-            budgetPersonInPeriodsSalaryMap.put("personId", person.getRolodexId());
-        }
-        budgetPersonInPeriodsSalaryMap.put("budgetPeriod", budgetPeriod);
-        Collection<BudgetPersonSalaryDetails> personSalaryDetails = boService.findMatchingOrderBy(BudgetPersonSalaryDetails.class, budgetPersonInPeriodsSalaryMap,"personSequenceNumber",true);
-        List<BudgetPersonSalaryDetails> budgetPersonSalaryDetails = (List<BudgetPersonSalaryDetails>) personSalaryDetails;
-        if (budgetPersonSalaryDetails != null && budgetPersonSalaryDetails.size() > 0) {
-            baseSalaryByPeriod = budgetPersonSalaryDetails.get(listIndex).getBaseSalary();
-        }
-        return baseSalaryByPeriod;
-    }
+
     @Override
     public String populateBudgetPersonSalaryDetailsInPeriods(String budgetId, String personSequenceNumber, String personId ){
         String baseSalary = "";

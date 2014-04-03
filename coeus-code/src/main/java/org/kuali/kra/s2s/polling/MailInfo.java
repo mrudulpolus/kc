@@ -18,7 +18,6 @@ package org.kuali.kra.s2s.polling;
 import org.apache.commons.lang3.StringUtils;
 import org.kuali.rice.core.api.mail.MailMessage;
 
-//import org.kuali.core.mail.MailMessage;
 
 /**
  * 
@@ -89,7 +88,7 @@ public class MailInfo {
     /**
      * Setter for property mailMessage.
      * 
-     * @param MailMessage New value of property dunsNumber.
+     * @param mailMessage New value of property dunsNumber.
      */
     public void setMailMessage(MailMessage mailMessage) {
         this.mailMessage = mailMessage;

@@ -11,9 +11,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.transform.TransformerException;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 
 /**
  * Grant application Xpath class.
@@ -212,39 +209,4 @@ public class GrantApplicationXpath
     {
         return getExecutor().execute(SUBMISSION_TITLE_XPATH);
     }
-
-    public static void main(String[] args)
-        throws Exception
-    {
-        BufferedReader reader = null;
-        try
-        {
-            File f = new File("c:/GetApplicationResponseMessage.xml");
-            reader = new BufferedReader(new FileReader(f));
-            String line = null;
-            StringBuffer buf = new StringBuffer();
-            while ((line = reader.readLine()) != null)
-            {
-                buf.append(line);
-            }
-
-            GrantApplicationXpath xpath = new GrantApplicationXpath(buf
-                .toString());
-            log.debug(xpath.getAgencyName());
-            log.debug(xpath.getCfdaNumber());
-            log.debug(xpath.getOpportunityId());
-        }
-        finally
-        {
-            try
-            {
-                reader.close();
-            }
-            catch (Exception ex)
-            {
-            }
-        }
-
-    }
-
 }

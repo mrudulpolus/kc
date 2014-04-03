@@ -16,7 +16,7 @@
     	<!-- End required KNS forms -->
 <!-- Rice content End -->
 
-		<form-bean name="ProposalDevelopmentForm" type="org.kuali.kra.proposaldevelopment.web.struts.form.ProposalDevelopmentForm" />
+		<form-bean name="ProposalDevelopmentForm" type="org.kuali.coeus.propdev.impl.core.ProposalDevelopmentForm" />
 		<form-bean name="ReportGenerationForm" type="org.kuali.kra.reporting.web.struts.form.ReportGenerationForm" />
 		<form-bean name="BudgetForm" type="org.kuali.kra.budget.web.struts.form.BudgetForm" />
 		<form-bean name="AwardBudgetForm" type="org.kuali.kra.award.budget.AwardBudgetForm" />
@@ -27,7 +27,7 @@
 		<form-bean name="AwardHierarchyForm" type="org.kuali.kra.award.AwardHierarchyForm" />
 		<form-bean name="DocHandlerForm" type="org.kuali.rice.kew.routing.web.DocHandlerForm" />
 		<form-bean name="UnitHierarchyForm" type="org.kuali.kra.web.struts.form.UnitHierarchyForm" />
-		<form-bean name="SponsorHierarchyForm" type="org.kuali.kra.web.struts.form.SponsorHierarchyForm" />
+		<form-bean name="SponsorHierarchyForm" type="org.kuali.coeus.common.impl.sponsor.hierarchy.SponsorHierarchyForm" />
 		<form-bean name="ProtocolForm" type="org.kuali.kra.irb.ProtocolForm" />
 		<form-bean name="ResearchAreasForm" type="org.kuali.kra.irb.ResearchAreasForm" />
 		<form-bean name="CommitteeForm" type="org.kuali.kra.committee.web.struts.form.CommitteeForm" />
@@ -50,7 +50,7 @@
         <form-bean name="ProtocolNotificationTemplateForm" type="org.kuali.kra.irb.actions.notification.ProtocolNotificationTemplateForm" />
         <form-bean name="JqueryAjaxForm" type="org.kuali.kra.jqueryajax.JqueryAjaxForm"/>
         <form-bean name="SubAwardForm" type="org.kuali.kra.subaward.SubAwardForm" />       
-        <form-bean name="CurrentOrPendingReportForm" type="org.kuali.kra.proposaldevelopment.web.struts.form.CurrentOrPendingReportForm" />
+        <form-bean name="CurrentOrPendingReportForm" type="org.kuali.coeus.common.proposal.framework.report.CurrentOrPendingReportForm" />
 		<form-bean name="CoiDisclosureForm" type="org.kuali.kra.coi.CoiDisclosureForm" />
 		<form-bean name="CoiCustomSearchForm" type="org.kuali.kra.coi.lookup.CoiCustomSearchForm" />
 		<form-bean name="FinancialEntityForm" type="org.kuali.kra.coi.personfinancialentity.FinancialEntityForm" />
@@ -184,14 +184,14 @@
             <forward name="basic" path="/researchAreaSearch.jsp" />
         </action> -->
         
- 		<action path="/sponsorHierarchy" name="SponsorHierarchyForm" input="/SponsorHierarchyInit.jsp" type="org.kuali.kra.web.struts.action.SponsorHierarchyAction" scope="request">
+ 		<action path="/sponsorHierarchy" name="SponsorHierarchyForm" input="/SponsorHierarchyInit.jsp" type="org.kuali.coeus.common.impl.sponsor.hierarchy.SponsorHierarchyAction" scope="request">
             <forward name="copy" path="/SponsorHierarchyCopy.jsp" />
             <forward name="new" path="/SponsorHierarchyNew.jsp" />
             <forward name="basic" path="/sponsorHierarchyInit.jsp" />
             <forward name="maint" path="/sponsorHierarchyMaint.jsp" />
             <forward name="lookup" path="/sponsorLookup.jsp" />
         </action>
-        <action path="/sponsorLookup" name="SponsorHierarchyForm" type="org.kuali.kra.web.struts.action.SponsorHierarchyAction">
+        <action path="/sponsorLookup" name="SponsorHierarchyForm" type="org.kuali.coeus.common.impl.sponsor.hierarchy.SponsorHierarchyAction">
             <forward name="basic" path="/sponsorLookup.jsp" />
             <forward name="lookup" path="/sponsorLookup.jsp" />
         </action>
@@ -208,7 +208,7 @@
             <forward name="basic" path="/WEB-INF/jsp/questionnaire/krmsRuleLookup.jsp" />
         </action>
         
-        <action path="/resubmissionPrompt" name="ProposalDevelopmentForm" attribute="KualiForm" scope="request" parameter="methodToCall" validate="false" input="/WEB-INF/jsp/institutionalproposal/ProposalLogMerge.jsp" type="org.kuali.kra.proposaldevelopment.web.struts.action.ProposalDevelopmentResubmissionPromptAction">
+        <action path="/resubmissionPrompt" name="ProposalDevelopmentForm" attribute="KualiForm" scope="request" parameter="methodToCall" validate="false" input="/WEB-INF/jsp/institutionalproposal/ProposalLogMerge.jsp" type="org.kuali.coeus.propdev.impl.resubmit.ProposalDevelopmentResubmissionPromptAction">
             <forward name="actions" path="/WEB-INF/jsp/proposaldevelopment/ProposalDevelopmentActions.jsp" />
             <forward name="basic" path="/WEB-INF/jsp/proposaldevelopment/ProposalDevelopmentResubmissionPrompt.jsp" />
             <forward name="grantsGov" path="/WEB-INF/jsp/proposaldevelopment/ProposalDevelopmentGrantsGov.jsp" />
@@ -635,6 +635,7 @@
           <forward name="subAwardActions" path="/WEB-INF/jsp/subaward/SubAwardActions.jsp" />
           <forward name="notificationEditor" path="/WEB-INF/jsp/subaward/SubAwardNotificationEditor.jsp" />
           <forward name="medusa" path="/WEB-INF/jsp/subaward/SubAwardMedusa.jsp" />
+          <forward name="templateInformation" path="/WEB-INF/jsp/subaward/SubAwardTemplateInformation.jsp" />
       </action>
 <!-- end -->
 	<action path="/currentOrPendingReport" name="CurrentOrPendingReportForm" input="/WEB-INF/jsp/currentOrPendingReport.jsp" type="org.kuali.kra.proposaldevelopment.web.struts.action.CurrentOrPendingReportAction"

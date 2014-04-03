@@ -17,7 +17,7 @@ package org.kuali.kra.budget.nonpersonnel;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.kuali.kra.budget.BudgetDecimal;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.kra.budget.calculator.QueryList;
 import org.kuali.kra.budget.document.BudgetDocument;
 import org.kuali.kra.budget.parameters.BudgetPeriod;
@@ -25,6 +25,8 @@ import org.kuali.kra.infrastructure.KeyConstants;
 import org.kuali.rice.krad.util.GlobalVariables;
 import org.kuali.rice.krad.util.MessageMap;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 public class BudgetExpenseRule {
@@ -180,16 +182,16 @@ public class BudgetExpenseRule {
         boolean valid = true;
         MessageMap errorMap = GlobalVariables.getMessageMap();
 
-        BudgetDecimal unitCost = budgetFormulatedCost.getUnitCost();
-        BudgetDecimal count = new BudgetDecimal(budgetFormulatedCost.getCount());
-        BudgetDecimal frequency = new BudgetDecimal(budgetFormulatedCost.getFrequency());
-        BudgetDecimal calculatedExpense = unitCost.multiply(count).multiply(frequency);
-        if(unitCost.isGreaterThan(new BudgetDecimal(MAX_BUDGET_DECIMAL_VALUE))){
+        BigDecimal unitCost = budgetFormulatedCost.getUnitCost().bigDecimalValue();
+        BigDecimal count = new ScaleTwoDecimal(budgetFormulatedCost.getCount()).bigDecimalValue();
+        BigDecimal frequency = new ScaleTwoDecimal(budgetFormulatedCost.getFrequency()).bigDecimalValue();
+        BigDecimal calculatedExpense = unitCost.multiply(count).multiply(frequency);
+        if(new ScaleTwoDecimal(unitCost).isGreaterThan(new ScaleTwoDecimal(MAX_BUDGET_DECIMAL_VALUE))){
             valid = false;
             errorMap.putError(errorKey+".unitCost", KeyConstants.ERROR_FORMULATED_UNIT_COST);
             
         }
-        if(calculatedExpense.isGreaterThan(new BudgetDecimal(MAX_BUDGET_DECIMAL_VALUE))){
+        if(new ScaleTwoDecimal(calculatedExpense).isGreaterThan(new ScaleTwoDecimal(MAX_BUDGET_DECIMAL_VALUE))){
             valid = false;
             errorMap.putError(errorKey+".calculatedExpenses", KeyConstants.ERROR_FORMULATED_CALCULATED_EXPENSES);
             

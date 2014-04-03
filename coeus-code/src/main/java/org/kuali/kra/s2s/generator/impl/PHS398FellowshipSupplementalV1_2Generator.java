@@ -36,18 +36,18 @@ import gov.grants.apply.system.globalLibraryV20.YesNoDataType.Enum;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlbeans.XmlObject;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentUtils;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.kra.budget.BudgetDecimal;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.kra.budget.calculator.QueryList;
 import org.kuali.kra.budget.document.BudgetDocument;
 import org.kuali.kra.budget.nonpersonnel.BudgetLineItem;
 import org.kuali.kra.budget.parameters.BudgetPeriod;
 import org.kuali.kra.infrastructure.CitizenshipTypes;
-import org.kuali.kra.proposaldevelopment.ProposalDevelopmentUtils;
 import org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal;
 import org.kuali.kra.proposaldevelopment.bo.Narrative;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.proposaldevelopment.service.ProposalDevelopmentS2sQuestionnaireService;
 import org.kuali.kra.proposaldevelopment.specialreview.ProposalSpecialReview;
 import org.kuali.kra.questionnaire.Questionnaire;
@@ -55,10 +55,11 @@ import org.kuali.kra.questionnaire.QuestionnaireQuestion;
 import org.kuali.kra.questionnaire.answer.Answer;
 import org.kuali.kra.questionnaire.answer.AnswerHeader;
 import org.kuali.kra.questionnaire.question.Question;
-import org.kuali.kra.s2s.S2SException;
 import org.kuali.kra.s2s.util.S2SConstants;
+import org.kuali.rice.kew.api.exception.WorkflowException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -477,9 +478,9 @@ public class PHS398FellowshipSupplementalV1_2Generator extends PHS398FellowshipS
         if (budgetDoc == null) {
             return;
         }
-        BudgetDecimal tuitionTotal = BudgetDecimal.ZERO;
+        ScaleTwoDecimal tuitionTotal = ScaleTwoDecimal.ZERO;
         for (BudgetPeriod budgetPeriod : budgetDoc.getBudget().getBudgetPeriods()) {
-            BudgetDecimal tuition = BudgetDecimal.ZERO;
+            ScaleTwoDecimal tuition = ScaleTwoDecimal.ZERO;
             for (BudgetLineItem budgetLineItem : budgetPeriod.getBudgetLineItems()) {
                 if (getCostElementsByParam(TUITION_COST_ELEMENTS).contains(budgetLineItem.getCostElementBO().getCostElement())) {
                     tuition = tuition.add(budgetLineItem.getLineItemCost());
@@ -510,7 +511,7 @@ public class PHS398FellowshipSupplementalV1_2Generator extends PHS398FellowshipS
             }
         }
         budget.setTuitionRequestedTotal(tuitionTotal.bigDecimalValue());
-        if (!tuitionTotal.equals(BudgetDecimal.ZERO)) {
+        if (!tuitionTotal.equals(ScaleTwoDecimal.ZERO)) {
             budget.setTuitionAndFeesRequested(YesNoDataType.Y_YES);
         }
     }
@@ -547,8 +548,8 @@ public class PHS398FellowshipSupplementalV1_2Generator extends PHS398FellowshipS
         BudgetDocument budgetDoc = getBudgetDocument();
         if (budgetDoc != null) {
             org.kuali.kra.budget.core.Budget pBudget = budgetDoc.getBudget();
-            BudgetDecimal sumOfLineItemCost = BudgetDecimal.ZERO;
-            BudgetDecimal numberOfMonths = BudgetDecimal.ZERO;
+            ScaleTwoDecimal sumOfLineItemCost = ScaleTwoDecimal.ZERO;
+            ScaleTwoDecimal numberOfMonths = ScaleTwoDecimal.ZERO;
             for (BudgetPeriod budgetPeriod : pBudget.getBudgetPeriods()) {
                 if (budgetPeriod.getBudgetPeriod() == 1) {
                     for (BudgetLineItem budgetLineItem : budgetPeriod.getBudgetLineItems()) {
@@ -574,9 +575,9 @@ public class PHS398FellowshipSupplementalV1_2Generator extends PHS398FellowshipS
     private BudgetDocument getBudgetDocument() {
         BudgetDocument budgetDoc = null;
         try {
-            budgetDoc = s2SBudgetCalculatorService.getFinalBudgetVersion(pdDoc);
+            budgetDoc = proposalBudgetService.getFinalBudgetVersion(pdDoc);
         }
-        catch (S2SException e) {
+        catch (WorkflowException e) {
             LOG.error("Error while getting Budget", e);
         }
         return budgetDoc;
@@ -774,8 +775,7 @@ public class PHS398FellowshipSupplementalV1_2Generator extends PHS398FellowshipS
 
     /**
      * This method is used to set HumanSubjectInvoved and VertebrateAnimalUsed XMLObject Data.
-     * 
-     * @param developmentProposal
+     *
      * @param researchTrainingPlan
      */
     private void setHumanSubjectInvolvedAndVertebrateAnimalUsed(ResearchTrainingPlan researchTrainingPlan) {
@@ -945,24 +945,19 @@ public class PHS398FellowshipSupplementalV1_2Generator extends PHS398FellowshipS
         String proposalTypeCode = pdDoc.getDevelopmentProposal().getProposalTypeCode();
         TypeOfApplication.Enum typeOfApplication = null;
         if (proposalTypeCode != null) {
-            if (proposalTypeCode.equals(ProposalDevelopmentUtils
-                    .getProposalDevelopmentDocumentParameter(ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_NEW_PARM))) {
+            if (proposalTypeCode.equals(parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class, ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_NEW_PARM))) {
                 typeOfApplication = TypeOfApplication.NEW;
             }
-            else if (proposalTypeCode.equals(ProposalDevelopmentUtils
-                    .getProposalDevelopmentDocumentParameter(ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_CONTINUATION_PARM))) {
+            else if (proposalTypeCode.equals(parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class, ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_CONTINUATION_PARM))) {
                 typeOfApplication = TypeOfApplication.CONTINUATION;
             }
-            else if (proposalTypeCode.equals(ProposalDevelopmentUtils
-                    .getProposalDevelopmentDocumentParameter(ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_REVISION_PARM))) {
+            else if (proposalTypeCode.equals(parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class, ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_REVISION_PARM))) {
                 typeOfApplication = TypeOfApplication.REVISION;
             }
-            else if (proposalTypeCode.equals(ProposalDevelopmentUtils
-                    .getProposalDevelopmentDocumentParameter(ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_RENEWAL_PARM))) {
+            else if (proposalTypeCode.equals(parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class, ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_RENEWAL_PARM))) {
                 typeOfApplication = TypeOfApplication.RENEWAL;
             }
-            else if (proposalTypeCode.equals(ProposalDevelopmentUtils
-                    .getProposalDevelopmentDocumentParameter(ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_RESUBMISSION_PARM))) {
+            else if (proposalTypeCode.equals(parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class, ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_RESUBMISSION_PARM))) {
                 typeOfApplication = TypeOfApplication.RESUBMISSION;
             }
             else if (proposalTypeCode.equals(PROPOSAL_TYPE_CODE_NEW7)) {
@@ -980,8 +975,8 @@ public class PHS398FellowshipSupplementalV1_2Generator extends PHS398FellowshipS
      * 
      * @return number of months between the start date and end date.
      */
-    private BudgetDecimal getNumberOfMonths(Date dateStart, Date dateEnd) {
-        BudgetDecimal monthCount = BudgetDecimal.ZERO;
+    private ScaleTwoDecimal getNumberOfMonths(Date dateStart, Date dateEnd) {
+        BigDecimal monthCount = ScaleTwoDecimal.ZERO.bigDecimalValue();
         int fullMonthCount = 0;
 
         Calendar startDate = Calendar.getInstance();
@@ -1000,17 +995,17 @@ public class PHS398FellowshipSupplementalV1_2Generator extends PHS398FellowshipS
         endDate.clear(Calendar.MILLISECOND);
 
         if (startDate.after(endDate)) {
-            return BudgetDecimal.ZERO;
+            return ScaleTwoDecimal.ZERO;
         }
         int startMonthDays = startDate.getActualMaximum(Calendar.DATE) - startDate.get(Calendar.DATE);
         startMonthDays++;
         int startMonthMaxDays = startDate.getActualMaximum(Calendar.DATE);
-        BudgetDecimal startMonthFraction = new BudgetDecimal(startMonthDays).divide(new BudgetDecimal(startMonthMaxDays));
+        BigDecimal startMonthFraction = new ScaleTwoDecimal(startMonthDays).bigDecimalValue().divide(new ScaleTwoDecimal(startMonthMaxDays).bigDecimalValue(), RoundingMode.HALF_UP);
 
         int endMonthDays = endDate.get(Calendar.DATE);
         int endMonthMaxDays = endDate.getActualMaximum(Calendar.DATE);
 
-        BudgetDecimal endMonthFraction = new BudgetDecimal(endMonthDays).divide(new BudgetDecimal(endMonthMaxDays));
+        BigDecimal endMonthFraction = new ScaleTwoDecimal(endMonthDays).bigDecimalValue().divide(new ScaleTwoDecimal(endMonthMaxDays).bigDecimalValue(), RoundingMode.HALF_UP);
 
         startDate.set(Calendar.DATE, 1);
         endDate.set(Calendar.DATE, 1);
@@ -1020,12 +1015,12 @@ public class PHS398FellowshipSupplementalV1_2Generator extends PHS398FellowshipS
             fullMonthCount++;
         }
         fullMonthCount = fullMonthCount - 1;
-        monthCount = monthCount.add(new BudgetDecimal(fullMonthCount)).add(startMonthFraction).add(endMonthFraction);
-        return monthCount;
+        monthCount = monthCount.add(new ScaleTwoDecimal(fullMonthCount).bigDecimalValue()).add(startMonthFraction).add(endMonthFraction);
+        return new ScaleTwoDecimal(monthCount);
     }
 
     /**
-     * This method creates {@link XmlObject} of type {@link PHSFellowshipSupplementalDocument} by populating data from the given
+     * This method creates {@link XmlObject} of type {@link PHSFellowshipSupplemental12Document} by populating data from the given
      * {@link ProposalDevelopmentDocument}
      * 
      * @param proposalDevelopmentDocument for which the {@link XmlObject} needs to be created

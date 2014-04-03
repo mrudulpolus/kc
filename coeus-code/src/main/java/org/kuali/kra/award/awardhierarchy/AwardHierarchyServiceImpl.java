@@ -21,7 +21,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ojb.broker.core.proxy.ProxyHelper;
 import org.kuali.coeus.common.framework.version.VersionException;
+import org.kuali.coeus.common.framework.version.VersionStatus;
 import org.kuali.coeus.common.framework.version.VersioningService;
+import org.kuali.coeus.common.framework.version.history.VersionHistory;
+import org.kuali.coeus.common.framework.version.history.VersionHistoryService;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.coeus.sys.framework.util.CollectionUtils;
 import org.kuali.kra.award.AwardAmountInfoService;
@@ -41,14 +44,11 @@ import org.kuali.kra.award.paymentreports.specialapproval.foreigntravel.AwardApp
 import org.kuali.kra.award.specialreview.AwardSpecialReview;
 import org.kuali.kra.award.timeandmoney.AwardDirectFandADistribution;
 import org.kuali.kra.award.version.service.AwardVersionService;
-import org.kuali.kra.bo.versioning.VersionHistory;
-import org.kuali.kra.bo.versioning.VersionStatus;
 import org.kuali.kra.infrastructure.Constants;
-import org.kuali.kra.service.VersionHistoryService;
 import org.kuali.kra.timeandmoney.AwardHierarchyNode;
 import org.kuali.kra.timeandmoney.document.TimeAndMoneyDocument;
 import org.kuali.kra.timeandmoney.transactions.PendingTransaction;
-import org.kuali.rice.core.api.util.type.KualiDecimal;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.rice.core.web.format.FormatException;
 import org.kuali.rice.coreservice.framework.parameter.ParameterConstants;
 import org.kuali.rice.coreservice.framework.parameter.ParameterService;
@@ -654,12 +654,12 @@ public class AwardHierarchyServiceImpl implements AwardHierarchyService {
             awardHierarchyNode.setObliDistributableAmount(awardAmountInfo.getObliDistributableAmount());
             awardHierarchyNode.setAntDistributableAmount(awardAmountInfo.getAntDistributableAmount());
             // we need to add in the pending transactions that are a result of changing totals in single-node view
-            KualiDecimal obligatedTotal = awardAmountInfo.getAmountObligatedToDate();
-            KualiDecimal obligatedTotalDirect = awardAmountInfo.getObligatedTotalDirect();
-            KualiDecimal obligatedTotalIndirect = awardAmountInfo.getObligatedTotalIndirect();
-            KualiDecimal anticipatedTotalAmount = awardAmountInfo.getAnticipatedTotalAmount();
-            KualiDecimal anticipatedTotalDirect = awardAmountInfo.getAnticipatedTotalDirect();
-            KualiDecimal anticipatedTotalIndirect = awardAmountInfo.getAnticipatedTotalIndirect();
+            ScaleTwoDecimal obligatedTotal = awardAmountInfo.getAmountObligatedToDate();
+            ScaleTwoDecimal obligatedTotalDirect = awardAmountInfo.getObligatedTotalDirect();
+            ScaleTwoDecimal obligatedTotalIndirect = awardAmountInfo.getObligatedTotalIndirect();
+            ScaleTwoDecimal anticipatedTotalAmount = awardAmountInfo.getAnticipatedTotalAmount();
+            ScaleTwoDecimal anticipatedTotalDirect = awardAmountInfo.getAnticipatedTotalDirect();
+            ScaleTwoDecimal anticipatedTotalIndirect = awardAmountInfo.getAnticipatedTotalIndirect();
             for (PendingTransaction pendingTransaction: timeAndMoneyDocument.getPendingTransactions()){
                 if (pendingTransaction.getProcessedFlag() == false && pendingTransaction.isSingleNodeTransaction()) {
                     obligatedTotal = obligatedTotal.add(pendingTransaction.getObligatedAmount());

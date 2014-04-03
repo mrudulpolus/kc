@@ -17,6 +17,8 @@ package org.kuali.kra.subaward;
 
 import org.apache.struts.upload.FormFile;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
+import org.kuali.coeus.common.framework.version.history.VersionHistory;
+import org.kuali.coeus.common.framework.version.history.VersionHistoryService;
 import org.kuali.coeus.common.notification.impl.web.struts.form.NotificationHelper;
 import org.kuali.coeus.common.permissions.impl.web.struts.form.PermissionsForm;
 import org.kuali.coeus.common.permissions.impl.web.struts.form.PermissionsHelperBase;
@@ -25,17 +27,16 @@ import org.kuali.coeus.sys.framework.model.AuditableForm;
 import org.kuali.coeus.sys.framework.model.KcTransactionalDocumentFormBase;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.award.home.Award;
-import org.kuali.kra.bo.versioning.VersionHistory;
 import org.kuali.kra.infrastructure.Constants;
 import org.kuali.kra.infrastructure.TaskName;
 import org.kuali.kra.medusa.MedusaBean;
-import org.kuali.kra.service.VersionHistoryService;
 import org.kuali.kra.subaward.bo.*;
 import org.kuali.kra.subaward.customdata.CustomDataHelper;
 import org.kuali.kra.subaward.document.SubAwardDocument;
 import org.kuali.kra.subaward.document.authorization.SubAwardTask;
 import org.kuali.kra.subaward.notification.SubAwardNotificationContext;
 import org.kuali.kra.subaward.service.SubAwardService;
+import org.kuali.kra.subaward.templateAttachments.SubAwardAttachmentFormBean;
 import org.kuali.kra.web.struts.form.CustomDataDocumentForm;
 import org.kuali.rice.core.api.CoreApiServiceLocator;
 import org.kuali.rice.core.api.config.property.ConfigurationService;
@@ -70,6 +71,17 @@ implements PermissionsForm, AuditableForm, CustomDataDocumentForm {
     private MedusaBean medusaBean;
     private FormFile newFile;
     private int defaultFollowUpDayDifference = 0;
+    private SubAwardAttachmentFormBean subAwardAttachmentFormBean;
+    
+
+
+    public SubAwardAttachmentFormBean getSubAwardAttachmentFormBean() {
+        return subAwardAttachmentFormBean;
+    }
+
+    public void setSubAwardAttachmentFormBean(SubAwardAttachmentFormBean subAwardAttachmentFormBean) {
+        this.subAwardAttachmentFormBean = subAwardAttachmentFormBean;
+    }
 
     /**.
     * This is the Getter Method for newFile
@@ -209,6 +221,7 @@ implements PermissionsForm, AuditableForm, CustomDataDocumentForm {
         newSubAwardAmountReleased = new SubAwardAmountReleased();
         newSubAwardAmountInfo = new SubAwardAmountInfo();
         notificationHelper = new NotificationHelper<SubAwardNotificationContext>();
+        subAwardAttachmentFormBean = new SubAwardAttachmentFormBean(this);
         
     }
 

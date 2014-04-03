@@ -23,14 +23,17 @@ import org.kuali.coeus.common.framework.org.Organization;
 import org.kuali.coeus.common.framework.person.KcPerson;
 import org.kuali.coeus.common.framework.person.KcPersonService;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
+import org.kuali.coeus.common.framework.sponsor.SponsorService;
 import org.kuali.coeus.common.framework.unit.Unit;
 import org.kuali.coeus.common.framework.unit.UnitService;
 import org.kuali.coeus.common.framework.unit.admin.UnitAdministrator;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentService;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.award.home.Award;
 import org.kuali.kra.award.home.ContactRole;
 import org.kuali.kra.bo.*;
-import org.kuali.kra.budget.BudgetDecimal;
 import org.kuali.kra.budget.personnel.BudgetPersonnelDetails;
 import org.kuali.kra.infrastructure.CitizenshipTypes;
 import org.kuali.kra.infrastructure.Constants;
@@ -41,28 +44,22 @@ import org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal;
 import org.kuali.kra.proposaldevelopment.bo.Narrative;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
 import org.kuali.kra.proposaldevelopment.bo.ProposalSite;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.proposaldevelopment.questionnaire.ProposalDevelopmentModuleQuestionnaireBean;
-import org.kuali.kra.proposaldevelopment.questionnaire.ProposalPersonModuleQuestionnaireBean;
 import org.kuali.kra.proposaldevelopment.service.NarrativeService;
 import org.kuali.kra.proposaldevelopment.service.ProposalDevelopmentS2sQuestionnaireService;
-import org.kuali.kra.proposaldevelopment.service.ProposalDevelopmentService;
 import org.kuali.kra.questionnaire.Questionnaire;
 import org.kuali.kra.questionnaire.QuestionnaireQuestion;
 import org.kuali.kra.questionnaire.answer.Answer;
 import org.kuali.kra.questionnaire.answer.AnswerHeader;
 import org.kuali.kra.questionnaire.answer.ModuleQuestionnaireBean;
 import org.kuali.kra.questionnaire.answer.QuestionnaireAnswerService;
-import org.kuali.kra.s2s.bo.S2sAppSubmission;
-import org.kuali.kra.s2s.bo.S2sOpportunity;
+import org.kuali.coeus.propdev.impl.s2s.S2sAppSubmission;
+import org.kuali.coeus.propdev.impl.s2s.S2sOpportunity;
 import org.kuali.kra.s2s.generator.bo.DepartmentalPerson;
 import org.kuali.kra.s2s.generator.bo.KeyPersonInfo;
 import org.kuali.kra.s2s.service.S2SUtilService;
 import org.kuali.kra.s2s.util.S2SConstants;
 import org.kuali.kra.service.CitizenshipTypeService;
-import org.kuali.kra.service.SponsorService;
-import org.kuali.rice.core.api.config.property.ConfigurationService;
-import org.kuali.rice.core.api.datetime.DateTimeService;
 import org.kuali.rice.coreservice.framework.parameter.ParameterConstants;
 import org.kuali.rice.coreservice.framework.parameter.ParameterService;
 import org.kuali.rice.krad.service.BusinessObjectService;
@@ -71,6 +68,8 @@ import org.kuali.rice.location.api.country.CountryService;
 import org.kuali.rice.location.api.state.State;
 import org.kuali.rice.location.api.state.StateService;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Date;
 import java.util.*;
 
@@ -83,12 +82,9 @@ import java.util.*;
  */
 public class S2SUtilServiceImpl implements S2SUtilService {
 
-    private static final String FEDERAL_ID_COMES_FROM_CURRENT_AWARD = "FEDERAL_ID_COMES_FROM_CURRENT_AWARD";
+
     private BusinessObjectService businessObjectService;
-    private DateTimeService dateTimeService;
-    private ConfigurationService kualiConfigurationService;
     private ParameterService parameterService;
-    private ProposalDevelopmentService proposalDevelopmentService;
     private KcPersonService kcPersonService;
     private SponsorService sponsorService;
     private NarrativeService narrativeService;
@@ -122,10 +118,10 @@ public class S2SUtilServiceImpl implements S2SUtilService {
 
     /**
      * This method creates and returns Map of submission details like submission type, description and Revision code
-     * 
+     *
      * @param pdDoc Proposal Development Document.
      * @return Map<String, String> Map of submission details.
-     * @see org.kuali.kra.s2s.service.S2SUtilService#getSubmissionType(org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument)
+     * @see org.kuali.kra.s2s.service.S2SUtilService#getSubmissionType(org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument)
      */
     public Map<String, String> getSubmissionType(ProposalDevelopmentDocument pdDoc) {
         Map<String, String> submissionInfo = new HashMap<String, String>();
@@ -155,7 +151,7 @@ public class S2SUtilServiceImpl implements S2SUtilService {
      * 
      * @param pdDoc Proposal Development Document.
      * @return DepartmentalPerson departmental Person object for a given proposal document.
-     * @see org.kuali.kra.s2s.service.S2SUtilService#getDepartmentalPerson(org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument)
+     * @see org.kuali.kra.s2s.service.S2SUtilService#getDepartmentalPerson(org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument)
      */
     public DepartmentalPerson getDepartmentalPerson(ProposalDevelopmentDocument pdDoc) {
         int count = 0;
@@ -289,7 +285,7 @@ public class S2SUtilServiceImpl implements S2SUtilService {
      * 
      * @param pdDoc Proposal Development Document.
      * @return Map<String, String> map containing the answers related to EOState Review for a given proposal.
-     * @see org.kuali.kra.s2s.service.S2SUtilService#getEOStateReview(org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument)
+     * @see org.kuali.kra.s2s.service.S2SUtilService#getEOStateReview(org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument)
      */
     public Map<String, String> getEOStateReview(ProposalDevelopmentDocument pdDoc) {
         Map<String, String> stateReview = new HashMap<String, String>();
@@ -325,153 +321,12 @@ public class S2SUtilServiceImpl implements S2SUtilService {
     }
 
     /**
-     * This method returns the Federal ID for a given proposal
-     * 
-     * @param proposalDevelopmentDocument Proposal Development Document.
-     * @return Federal ID for a given proposal.
-     * @see org.kuali.kra.s2s.service.S2SUtilService#getFederalId(org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument)
-     */
-    public String getFederalId(ProposalDevelopmentDocument proposalDevelopmentDocument) {
-        String federalIdComesFromAwardStr = parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
-                FEDERAL_ID_COMES_FROM_CURRENT_AWARD);
-        Boolean federalIdComesFromAward = federalIdComesFromAwardStr != null && federalIdComesFromAwardStr.equalsIgnoreCase("Y");
-        DevelopmentProposal proposal = proposalDevelopmentDocument.getDevelopmentProposal();
-        Award currentAward = null;
-        String federalId = null;
-        if (StringUtils.isNotBlank(proposal.getCurrentAwardNumber())) {
-            currentAward = proposalDevelopmentService.getProposalCurrentAwardVersion(proposalDevelopmentDocument);
-        }
-        InstitutionalProposal institutionalProposal = null;
-        if (StringUtils.isNotBlank(proposal.getContinuedFrom())) {
-            institutionalProposal = proposalDevelopmentService.getProposalContinuedFromVersion(proposalDevelopmentDocument);
-        }
-        if (isProposalTypeRenewalRevisionContinuation(proposal.getProposalTypeCode())) {
-            if (!StringUtils.isBlank(proposal.getSponsorProposalNumber())) {
-                federalId = proposal.getSponsorProposalNumber();
-            }
-            else if (currentAward != null && !StringUtils.isBlank(currentAward.getSponsorAwardNumber()) && federalIdComesFromAward) {
-                federalId = currentAward.getSponsorAwardNumber();
-            }
-            else {
-                return null;
-            }
-        }
-        else if (isProposalTypeNew(proposal.getProposalTypeCode())
-                && (proposal.getS2sOpportunity() != null && isSubmissionTypeChangeCorrected(proposal.getS2sOpportunity()
-                        .getS2sSubmissionTypeCode()))) {
-            if (!StringUtils.isBlank(proposal.getSponsorProposalNumber())) {
-                federalId = proposal.getSponsorProposalNumber();
-            }
-            else if (institutionalProposal != null) {
-                federalId = getGgTrackingIdFromProposal(institutionalProposal);
-            }
-        }
-        else if (isProposalTypeResubmission(proposal.getProposalTypeCode())) {
-            if (!StringUtils.isBlank(proposal.getSponsorProposalNumber())) {
-                federalId = proposal.getSponsorProposalNumber();
-            }
-            else if (institutionalProposal != null && !StringUtils.isBlank(institutionalProposal.getSponsorProposalNumber())) {
-                federalId = institutionalProposal.getSponsorProposalNumber();
-            }
-            if (isProposalTypeResubmission(proposal.getProposalTypeCode())) {
-                if (proposal.getSponsorCode().equals(
-                        this.parameterService.getParameterValueAsString(Constants.KC_GENERIC_PARAMETER_NAMESPACE,
-                                ParameterConstants.ALL_COMPONENT, KeyConstants.NSF_SPONSOR_CODE))) {
-                    return null;
-                }
-            }
-        }
-        if (federalId != null && sponsorService.isSponsorNihMultiplePi(proposal)) {
-            return fromatFederalId(federalId);
-        }
-        return federalId;
-    }
-
-    @Override
-    public String getGgTrackingIdFromProposal(InstitutionalProposal proposal) {
-        DevelopmentProposal newestDevProp = getNewestDevPropFromInstProp(proposal);
-        if (newestDevProp != null && newestDevProp.getS2sOpportunity() != null) {
-            S2sAppSubmission appSubmission = null;
-            int submissionNo = 0;
-            for (S2sAppSubmission s2AppSubmission : newestDevProp.getS2sAppSubmission()) {
-                if (s2AppSubmission.getSubmissionNumber() > submissionNo
-                        && StringUtils.isNotBlank(s2AppSubmission.getGgTrackingId())) {
-                    appSubmission = s2AppSubmission;
-                    submissionNo = s2AppSubmission.getSubmissionNumber();
-                }
-            }
-            if (appSubmission != null) {
-                return appSubmission.getGgTrackingId();
-            }
-            else {
-                return null;
-            }
-        }
-        else {
-            return null;
-        }
-    }
-
-    protected DevelopmentProposal getNewestDevPropFromInstProp(InstitutionalProposal instProp) {
-        Integer listDetailSize = 0;
-        ProposalAdminDetails curDetail = new ProposalAdminDetails();
-        Map<String, Object> detailFieldValues = new HashMap<String, Object>();
-        detailFieldValues.put("instProposalId", instProp.getProposalId());
-        List<ProposalAdminDetails> details = (List<ProposalAdminDetails>) businessObjectService.findMatchingOrderBy(ProposalAdminDetails.class,
-                detailFieldValues, "devProposalNumber", true);
-        listDetailSize = details.size();
-        if (listDetailSize > 1) {
-            curDetail = details.get(listDetailSize - 2);
-            Map<String, Object> fieldValues = new HashMap<String, Object>();
-            fieldValues.put("proposalNumber", curDetail.getDevelopmentProposal().getProposalNumber());
-            List<S2sAppSubmission> s2sSubmissionDetails = (List<S2sAppSubmission>) businessObjectService.findMatchingOrderBy(S2sAppSubmission.class,
-                    fieldValues, "proposalNumber", true);
-            curDetail.getDevelopmentProposal().setS2sAppSubmission(s2sSubmissionDetails);
-            return curDetail.getDevelopmentProposal();
-        }
-        if (listDetailSize == 1) {
-            curDetail = details.get(0);
-            Map<String, Object> fieldValues = new HashMap<String, Object>();
-            fieldValues.put("proposalNumber", curDetail.getDevelopmentProposal().getProposalNumber());
-            List<S2sAppSubmission> s2sSubmissionDetails = (List<S2sAppSubmission>) businessObjectService.findMatchingOrderBy(S2sAppSubmission.class,
-                    fieldValues, "proposalNumber", true);
-            curDetail.getDevelopmentProposal().setS2sAppSubmission(s2sSubmissionDetails);
-            return curDetail.getDevelopmentProposal();
-
-        }
-        return null;
-    }
-
-    /**
-     * 
-     * This method is to format sponsor award number assume sponsor award number format is like this : 5-P01-ES05622-09, it should
-     * be formatted to ES05622
-     * 
-     * @param federalId
-     * @return
-     */
-    protected String fromatFederalId(String federalId) {
-        if (federalId.length() > 7) {
-            int in = federalId.indexOf('-', 8);
-            if (in != -1)
-                federalId = federalId.substring(6, in);
-        }
-        return federalId;
-    }
-
-    protected boolean isSubmissionTypeChangeCorrected(String submissionTypeCode) {
-        return StringUtils
-                .equalsIgnoreCase(submissionTypeCode, getParameterValue(KeyConstants.S2S_SUBMISSIONTYPE_CHANGEDCORRECTED));
-    }
-
-    /**
      * This method fetches system constant parameters
-     * 
+     *
      * @param parameter String for which value must be fetched
      * @return String System constant parameters.
-     * @see org.kuali.kra.s2s.service.S2SUtilService#getParameterValue(java.lang.String)
      */
-    public String getParameterValue(String parameter) {
+    protected String getParameterValue(String parameter) {
         String parameterValue = null;
         try {
             parameterValue = this.parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class, parameter);
@@ -482,51 +337,7 @@ public class S2SUtilServiceImpl implements S2SUtilService {
         return parameterValue;
     }
 
-    protected boolean isProposalTypeRenewalRevisionContinuation(String proposalTypeCode) {
-        String proposalTypeCodeRenewal = parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
-                KeyConstants.PROPOSALDEVELOPMENT_PROPOSALTYPE_RENEWAL);
-        String proposalTypeCodeRevision = parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
-                KeyConstants.PROPOSALDEVELOPMENT_PROPOSALTYPE_REVISION);
-        String proposalTypeCodeContinuation = parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
-                KeyConstants.PROPOSALDEVELOPMENT_PROPOSALTYPE_CONTINUATION);
 
-        return !StringUtils.isEmpty(proposalTypeCode)
-                && (proposalTypeCode.equals(proposalTypeCodeRenewal) || proposalTypeCode.equals(proposalTypeCodeRevision) || proposalTypeCode
-                        .equals(proposalTypeCodeContinuation));
-    }
-
-    /**
-     * Is the Proposal Type set to Resubmission?
-     * 
-     * @param proposalTypeCode proposal type code
-     * @return true or false
-     */
-    protected boolean isProposalTypeResubmission(String proposalTypeCode) {
-        String proposalTypeCodeResubmission = parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
-                KeyConstants.PROPOSALDEVELOPMENT_PROPOSALTYPE_RESUBMISSION);
-
-        return !StringUtils.isEmpty(proposalTypeCode) && (proposalTypeCode.equals(proposalTypeCodeResubmission));
-    }
-
-    /**
-     * Is the Proposal Type set to New?
-     * 
-     * @param proposalTypeCode proposal type code
-     * @return true or false
-     */
-    protected boolean isProposalTypeNew(String proposalTypeCode) {
-        String proposalTypeCodeNew = parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
-                KeyConstants.PROPOSALDEVELOPMENT_PROPOSALTYPE_NEW);
-
-        return !StringUtils.isEmpty(proposalTypeCode) && (proposalTypeCode.equals(proposalTypeCodeNew));
-    }
-
-
-    @Override
-    public String getProperty(String key) {
-        String value = kualiConfigurationService.getPropertyValueAsString(key);
-        return value == null ? "" : value;
-    }
 
     /**
      * This method returns a {@link Calendar} whose date matches the date passed as {@link String}
@@ -538,7 +349,7 @@ public class S2SUtilServiceImpl implements S2SUtilService {
     public Calendar convertDateStringToCalendar(String dateStr) {
         Calendar calendar = null;
         if (dateStr != null) {
-            calendar = dateTimeService.getCurrentCalendar();
+            calendar = Calendar.getInstance();
             calendar.set(Integer.parseInt(dateStr.substring(6, 10)), Integer.parseInt(dateStr.substring(0, 2)) - 1,
                     Integer.parseInt(dateStr.substring(3, 5)));
         }
@@ -546,18 +357,8 @@ public class S2SUtilServiceImpl implements S2SUtilService {
     }
 
     /**
-     * 
-     * This method is used to get current Calendar
-     * 
-     * @return {@link Calendar}
-     */
-    public Calendar getCurrentCalendar() {
-        return dateTimeService.getCurrentCalendar();
-    }
-
-    /**
      * This method is used to get Calendar date for the corresponding date object.
-     * 
+     *
      * @param date(Date) date for which Calendar value has to be found.
      * @return calendar value corresponding to the date.
      * @see org.kuali.kra.s2s.service.S2SUtilService#convertDateToCalendar(java.sql.Date)
@@ -565,7 +366,8 @@ public class S2SUtilServiceImpl implements S2SUtilService {
     public Calendar convertDateToCalendar(Date date) {
         Calendar calendar = null;
         if (date != null) {
-            calendar = dateTimeService.getCalendar(date);
+            calendar = Calendar.getInstance();
+            calendar.setTime(date);
         }
         return calendar;
     }
@@ -580,24 +382,6 @@ public class S2SUtilServiceImpl implements S2SUtilService {
     }
 
     /**
-     * Sets the dateTimeService attribute value.
-     * 
-     * @param dateTimeService The dateTimeService to set.
-     */
-    public void setDateTimeService(DateTimeService dateTimeService) {
-        this.dateTimeService = dateTimeService;
-    }
-
-    /**
-     * Gets the kualiConfigurationService attribute.
-     * 
-     * @return Returns the kualiConfigurationService.
-     */
-    public ConfigurationService getKualiConfigurationService() {
-        return kualiConfigurationService;
-    }
-
-    /**
      * Sets the ParameterService.
      * 
      * @param parameterService the parameter service.
@@ -607,20 +391,11 @@ public class S2SUtilServiceImpl implements S2SUtilService {
     }
 
     /**
-     * Sets the kualiConfigurationService attribute value.
-     * 
-     * @param kualiConfigurationService The kualiConfigurationService to set.
-     */
-    public void setKualiConfigurationService(ConfigurationService kualiConfigurationService) {
-        this.kualiConfigurationService = kualiConfigurationService;
-    }
-
-    /**
      * This method is to get division name using the OwnedByUnit and traversing through the parent units till the top level
      * 
      * @param pdDoc Proposal development document.
      * @return divisionName based on the OwnedByUnit.
-     * @see org.kuali.kra.s2s.service.S2SUtilService#getDivisionName(org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument)
+     * @see org.kuali.kra.s2s.service.S2SUtilService#getDivisionName(org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument)
      */
     public String getDivisionName(ProposalDevelopmentDocument pdDoc) {
         String divisionName = null;
@@ -643,7 +418,7 @@ public class S2SUtilServiceImpl implements S2SUtilService {
      * 
      * @param pdDoc Proposal development document.
      * @return ProposalPerson PrincipalInvestigator for the proposal.
-     * @see org.kuali.kra.s2s.service.S2SUtilService#getPrincipalInvestigator(org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument)
+     * @see org.kuali.kra.s2s.service.S2SUtilService#getPrincipalInvestigator(org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument)
      */
     public ProposalPerson getPrincipalInvestigator(ProposalDevelopmentDocument pdDoc) {
         ProposalPerson proposalPerson = null;
@@ -659,9 +434,6 @@ public class S2SUtilServiceImpl implements S2SUtilService {
 
     /**
      * Finds all the Investigators associated with the provided pdDoc.
-     * 
-     * @param ProposalDevelopmentDocument
-     * @return
      */
     public List<ProposalPerson> getCoInvestigators(ProposalDevelopmentDocument pdDoc) {
         List<ProposalPerson> investigators = new ArrayList<ProposalPerson>();
@@ -677,9 +449,6 @@ public class S2SUtilServiceImpl implements S2SUtilService {
 
     /**
      * Finds all the key Person associated with the provided pdDoc.
-     * 
-     * @param ProposalDevelopmentDocument
-     * @return
      */
     public List<ProposalPerson> getKeyPersons(ProposalDevelopmentDocument pdDoc) {
         List<ProposalPerson> keyPersons = new ArrayList<ProposalPerson>();
@@ -718,7 +487,7 @@ public class S2SUtilServiceImpl implements S2SUtilService {
      * 
      * @param stateName Name of the state
      * @return State object matching the name.
-     * @see org.kuali.kra.s2s.service.S2SUtilService#getStateFromName(java.lang.String)
+     * @see org.kuali.kra.s2s.service.S2SUtilService#getStateFromName(java.lang.String, java.lang.String)
      */
     public State getStateFromName(String countryAlternateCode, String stateName) {
         Country country = getCountryFromCode(countryAlternateCode);
@@ -729,29 +498,6 @@ public class S2SUtilServiceImpl implements S2SUtilService {
 
     protected static StateService getStateService() {
         return KcServiceLocator.getService(StateService.class);
-    }
-
-    /**
-     * This method compares a proposal person with budget person. It checks whether the proposal person is from PERSON or ROLODEX
-     * and matches the respective person ID with the person in {@link BudgetPersonnelDetails}. It returns true only if IDs are not
-     * null and also matches eachother.
-     * 
-     * @param proposalPerson - key person from proposal
-     * @param budgetPersonnelDetails person from BudgetPersonnelDetails
-     * @return true if persons match, false otherwise
-     * @see org.kuali.kra.s2s.service.S2SUtilService#proposalPersonEqualsBudgetPerson(org.kuali.kra.proposaldevelopment.bo.ProposalPerson,
-     *      org.kuali.kra.budget.personnel.BudgetPersonnelDetails)
-     */
-    public boolean proposalPersonEqualsBudgetPerson(ProposalPerson proposalPerson, BudgetPersonnelDetails budgetPersonnelDetails) {
-        boolean equal = false;
-        if (proposalPerson != null && budgetPersonnelDetails != null) {
-            String budgetPersonId = budgetPersonnelDetails.getPersonId();
-            if ((proposalPerson.getPersonId() != null && proposalPerson.getPersonId().equals(budgetPersonId))
-                    || (proposalPerson.getRolodexId() != null && proposalPerson.getRolodexId().toString().equals(budgetPersonId))) {
-                equal = true;
-            }
-        }
-        return equal;
     }
 
 
@@ -777,38 +523,6 @@ public class S2SUtilServiceImpl implements S2SUtilService {
         return equal;
     }
 
-    public void setProposalDevelopmentService(ProposalDevelopmentService proposalDevelopmentService) {
-        this.proposalDevelopmentService = proposalDevelopmentService;
-    }
-
-
-    @Override
-    public String convertStringArrayToString(String[] stringArray) {
-        StringBuilder stringBuilder = new StringBuilder();
-        if (stringArray != null && stringArray.length > 0) {
-            for (int i = 0; i < stringArray.length; i++) {
-                if (stringBuilder.length() > 0) {
-                    stringBuilder.append(", ");
-                }
-                stringBuilder.append(stringArray[i]);
-            }
-        }
-        return stringBuilder.toString();
-    }
-
-    public String convertStringListToString(List<String> stringList) {
-        String retVal = "";
-        if (stringList != null) {
-            for (int i = 0; i < stringList.size(); i++) {
-                retVal += stringList.get(i);
-                if (i != stringList.size() - 1) {
-                    retVal += ", ";
-                }
-            }
-        }
-        return retVal;
-    }
-
     /**
      * Finds all the Questionnaire Answers associates with provided ProposalNumber.
      * 
@@ -830,23 +544,6 @@ public class S2SUtilServiceImpl implements S2SUtilService {
             for (AnswerHeader answerHeader : answerHeaderList) {
                 questionnaireAnswers.addAll(answerHeader.getAnswers());
             }
-        }
-        return questionnaireAnswers;
-    }
-
-    /**
-     * 
-     * @see org.kuali.kra.s2s.service.S2SUtilService#getQuestionnaireAnswersForPerson(org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument,
-     *      org.kuali.kra.proposaldevelopment.bo.ProposalPerson)
-     */
-    public List<Answer> getQuestionnaireAnswersForPI(ProposalDevelopmentDocument pdDoc) {
-        List<Answer> questionnaireAnswers = new ArrayList<Answer>();
-        DevelopmentProposal proposal = pdDoc.getDevelopmentProposal();
-        ProposalPerson person = proposal.getPrincipalInvestigator();
-        ProposalPersonModuleQuestionnaireBean bean = new ProposalPersonModuleQuestionnaireBean(proposal, person);
-        List<AnswerHeader> headers = KcServiceLocator.getService(QuestionnaireAnswerService.class).getQuestionnaireAnswer(bean);
-        for (AnswerHeader answerHeader : headers) {
-            questionnaireAnswers.addAll(answerHeader.getAnswers());
         }
         return questionnaireAnswers;
     }
@@ -898,7 +595,6 @@ public class S2SUtilServiceImpl implements S2SUtilService {
      * This method is used to get the details of Contact person
      * 
      * @param pdDoc(ProposalDevelopmentDocument) proposal development document.
-     * @param contactType(String) for which the DepartmentalPerson has to be found.
      * @return depPerson(DepartmentalPerson) corresponding to the contact type.
      */
     public DepartmentalPerson getContactPerson(ProposalDevelopmentDocument pdDoc) {
@@ -1029,8 +725,8 @@ public class S2SUtilServiceImpl implements S2SUtilService {
      * 
      * @return number of months between the start date and end date.
      */
-    public BudgetDecimal getNumberOfMonths(Date dateStart, Date dateEnd) {
-        BudgetDecimal monthCount = BudgetDecimal.ZERO;
+    public ScaleTwoDecimal getNumberOfMonths(Date dateStart, Date dateEnd) {
+        ScaleTwoDecimal monthCount = ScaleTwoDecimal.ZERO;
         int fullMonthCount = 0;
 
         Calendar startDate = Calendar.getInstance();
@@ -1049,17 +745,17 @@ public class S2SUtilServiceImpl implements S2SUtilService {
         endDate.clear(Calendar.MILLISECOND);
 
         if (startDate.after(endDate)) {
-            return BudgetDecimal.ZERO;
+            return ScaleTwoDecimal.ZERO;
         }
         int startMonthDays = startDate.getActualMaximum(Calendar.DATE) - startDate.get(Calendar.DATE);
         startMonthDays++;
         int startMonthMaxDays = startDate.getActualMaximum(Calendar.DATE);
-        BudgetDecimal startMonthFraction = new BudgetDecimal(startMonthDays).divide(new BudgetDecimal(startMonthMaxDays));
+        BigDecimal startMonthFraction = BigDecimal.valueOf(startMonthDays).setScale(2, RoundingMode.HALF_UP).divide(BigDecimal.valueOf(startMonthMaxDays).setScale(2, RoundingMode.HALF_UP), RoundingMode.HALF_UP);
 
         int endMonthDays = endDate.get(Calendar.DATE);
         int endMonthMaxDays = endDate.getActualMaximum(Calendar.DATE);
 
-        BudgetDecimal endMonthFraction = new BudgetDecimal(endMonthDays).divide(new BudgetDecimal(endMonthMaxDays));
+        BigDecimal endMonthFraction = BigDecimal.valueOf(endMonthDays).setScale(2, RoundingMode.HALF_UP).divide(BigDecimal.valueOf(endMonthMaxDays).setScale(2, RoundingMode.HALF_UP), RoundingMode.HALF_UP);
 
         startDate.set(Calendar.DATE, 1);
         endDate.set(Calendar.DATE, 1);
@@ -1069,45 +765,9 @@ public class S2SUtilServiceImpl implements S2SUtilService {
             fullMonthCount++;
         }
         fullMonthCount = fullMonthCount - 1;
-        monthCount = monthCount.add(new BudgetDecimal(fullMonthCount)).add(startMonthFraction).add(endMonthFraction);
+        monthCount = monthCount.add(new ScaleTwoDecimal(fullMonthCount)).add(new ScaleTwoDecimal(startMonthFraction)).add(new ScaleTwoDecimal(endMonthFraction));
         return monthCount;
     }
-
-    /**
-     * 
-     * This method gets the Federal Agency for the given {@link ProposalDevelopmentDocument}
-     * 
-     * @param developmentProposal Proposal Development Document.
-     * @return {@link String} Federal Agency
-     */
-    public String getCognizantFedAgency(DevelopmentProposal developmentProposal) {
-        StringBuilder fedAgency = new StringBuilder();
-        ProposalSite applicantOrganization = developmentProposal.getApplicantOrganization();
-        if (applicantOrganization != null && applicantOrganization.getOrganization() != null
-                && applicantOrganization.getOrganization().getCognizantAuditor() != null) {
-            applicantOrganization.getOrganization().refreshReferenceObject("cognizantAuditorRolodex");
-            Rolodex rolodex = applicantOrganization.getOrganization().getCognizantAuditorRolodex();
-            fedAgency.append(rolodex.getOrganization());
-            fedAgency.append(", ");
-            fedAgency.append(StringUtils.trimToEmpty(rolodex.getFirstName()));
-            fedAgency.append(" ");
-            fedAgency.append(StringUtils.trimToEmpty(rolodex.getLastName()));
-            fedAgency.append(" ");
-            if (rolodex.getPhoneNumber() != null) {
-                if (rolodex.getPhoneNumber().length() < 180) {
-                    fedAgency.append(rolodex.getPhoneNumber());
-                }
-                else {
-                    fedAgency.append(rolodex.getPhoneNumber().substring(0, 180));
-                }
-            }
-        }
-        if (fedAgency.toString().length() == 0) {
-            fedAgency.append(S2SConstants.VALUE_UNKNOWN);
-        }
-        return fedAgency.toString();
-    }
-
 
     /**
      * Gets the sponsorService attribute.
@@ -1171,8 +831,8 @@ public class S2SUtilServiceImpl implements S2SUtilService {
             CitizenshipType citizenShip;
             String allowOverride = parameterService.getParameterValueAsString("KC-GEN", "A",
                     "ALLOW_PROPOSAL_PERSON_TO_OVERRIDE_KC_PERSON_EXTENDED_ATTRIBUTES");
-            if ("Y".equals(allowOverride) && proposalPerson.getProposalPersonExtendedAttributes() != null) {
-                citizenShip = proposalPerson.getProposalPersonExtendedAttributes().getCitizenshipType();
+            if ("Y".equals(allowOverride)) {
+                citizenShip = proposalPerson.getCitizenshipType();
             }
             else {
                 citizenShip = proposalPerson.getPerson().getExtendedAttributes().getCitizenshipType();
@@ -1240,7 +900,7 @@ public class S2SUtilServiceImpl implements S2SUtilService {
     }
 
     public String removeTimezoneFactor(String applicationXmlText) {
-        Calendar cal = dateTimeService.getCurrentCalendar();
+        Calendar cal = Calendar.getInstance();
         int dstOffsetMilli = cal.get(Calendar.DST_OFFSET);
         int zoneOffsetMilli = cal.get(Calendar.ZONE_OFFSET);
         zoneOffsetMilli = cal.getTimeZone().useDaylightTime()?zoneOffsetMilli+dstOffsetMilli:zoneOffsetMilli;

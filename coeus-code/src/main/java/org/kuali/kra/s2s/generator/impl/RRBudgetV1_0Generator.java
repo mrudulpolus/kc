@@ -40,11 +40,11 @@ import gov.grants.apply.system.globalLibraryV10.YesNoDataType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlbeans.XmlObject;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.kra.budget.BudgetDecimal;
 import org.kuali.kra.budget.core.BudgetService;
 import org.kuali.kra.proposaldevelopment.bo.Narrative;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.s2s.S2SException;
 import org.kuali.kra.s2s.generator.bo.*;
 import org.kuali.kra.s2s.util.S2SConstants;
@@ -537,7 +537,7 @@ public class RRBudgetV1_0Generator extends RRBudgetBaseGenerator {
 	private KeyPersons getKeyPersons(BudgetPeriodInfo periodInfo) {
 
 		KeyPersons keyPersons = KeyPersons.Factory.newInstance();
-		BudgetDecimal extraFunds = BudgetDecimal.ZERO;
+		ScaleTwoDecimal extraFunds = ScaleTwoDecimal.ZERO;
 		if (periodInfo != null) {
 			KeyPersonDataType[] keyPersonDataTypeArray = null;
 			if (periodInfo.getKeyPersons() != null) {
@@ -643,7 +643,7 @@ public class RRBudgetV1_0Generator extends RRBudgetBaseGenerator {
 		KeyPersonCompensationDataType keyPersonCompensation = KeyPersonCompensationDataType.Factory
 				.newInstance();
 		BudgetService budgetService = KcServiceLocator.getService(BudgetService.class);
-        BudgetDecimal baseSalaryByPeriod; 
+        ScaleTwoDecimal baseSalaryByPeriod;
 		
 		if (keyPerson != null) {
 			if (keyPerson.getAcademicMonths() != null) {
@@ -671,7 +671,7 @@ public class RRBudgetV1_0Generator extends RRBudgetBaseGenerator {
 						.getFundsRequested().bigDecimalValue());
 			}
             if (pdDoc.getBudgetDocumentVersions() != null) {
-                baseSalaryByPeriod = budgetService.getBaseSalaryByPeriod(pdDoc.getBudgetDocumentVersion(0)
+                baseSalaryByPeriod = s2sBudgetCalculatorService.getBaseSalaryByPeriod(pdDoc.getBudgetDocumentVersion(0)
                         .getBudgetVersionOverview().getBudgetId(), budgetPeriod, keyPerson);
                 if (baseSalaryByPeriod != null) {
                     keyPersonCompensation.setBaseSalary(baseSalaryByPeriod.bigDecimalValue());
@@ -924,7 +924,7 @@ public class RRBudgetV1_0Generator extends RRBudgetBaseGenerator {
 				&& periodInfo.getEquipment().size() > 0) {
 			// Evaluating Equipments.
 			List<EquipmentList> equipmentArrayList = new ArrayList<EquipmentList>();
-			BudgetDecimal totalFund = BudgetDecimal.ZERO;
+			ScaleTwoDecimal totalFund = ScaleTwoDecimal.ZERO;
 			for (CostInfo costInfo : periodInfo.getEquipment().get(0)
 					.getEquipmentList()) {
 				EquipmentList equipmentList = EquipmentList.Factory
@@ -939,7 +939,7 @@ public class RRBudgetV1_0Generator extends RRBudgetBaseGenerator {
 			}
 			// Evaluating Extra Equipments.
 			List<CostInfo> extraEquipmentArrayList = new ArrayList<CostInfo>();
-			BudgetDecimal totalExtraEquipFund = BudgetDecimal.ZERO;
+			ScaleTwoDecimal totalExtraEquipFund = ScaleTwoDecimal.ZERO;
 			for(CostInfo costInfo:periodInfo.getEquipment().get(0).getExtraEquipmentList()){
 				extraEquipmentArrayList.add(costInfo);
 				totalExtraEquipFund = totalExtraEquipFund.add(costInfo.getCost());
@@ -1081,7 +1081,7 @@ public class RRBudgetV1_0Generator extends RRBudgetBaseGenerator {
 	private Other getOtherPTSupportCosts(BudgetPeriodInfo periodInfo) {
 		Other other = Other.Factory.newInstance();
 		other.setDescription(OTHERCOST_DESCRIPTION);
-		BudgetDecimal otherCost = BudgetDecimal.ZERO;
+		ScaleTwoDecimal otherCost = ScaleTwoDecimal.ZERO;
 		if (periodInfo != null && periodInfo.getpartOtherCost() != null) {
 			otherCost = periodInfo.getpartOtherCost();
 		}

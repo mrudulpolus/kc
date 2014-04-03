@@ -40,20 +40,20 @@ import gov.grants.apply.system.attachmentsV10.AttachedFileDataType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlbeans.XmlObject;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
+import org.kuali.coeus.common.framework.print.PrintingException;
+import org.kuali.coeus.common.framework.print.PrintingService;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.kra.budget.BudgetDecimal;
 import org.kuali.kra.budget.core.Budget;
 import org.kuali.kra.budget.core.BudgetService;
 import org.kuali.kra.budget.document.BudgetDocument;
-import org.kuali.kra.printing.PrintingException;
-import org.kuali.kra.printing.print.GenericPrintable;
-import org.kuali.kra.printing.service.PrintingService;
 import org.kuali.kra.proposaldevelopment.bo.AttachmentDataSource;
 import org.kuali.kra.proposaldevelopment.bo.Narrative;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
-import org.kuali.kra.s2s.S2SException;
 import org.kuali.kra.s2s.generator.bo.*;
+import org.kuali.kra.s2s.printing.GenericPrintable;
 import org.kuali.kra.s2s.util.S2SConstants;
+import org.kuali.rice.kew.api.exception.WorkflowException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -107,12 +107,12 @@ public class RRFedNonFedBudgetV1_1Generator extends RRFedNonFedBudgetBaseGenerat
             validateBudgetForForm(pdDoc);
             budgetPeriodList = s2sBudgetCalculatorService.getBudgetPeriods(pdDoc);
             budgetSummary = s2sBudgetCalculatorService.getBudgetInfo(pdDoc,budgetPeriodList);
-            BudgetDocument budgetDocument = s2sBudgetCalculatorService.getFinalBudgetVersion(pdDoc);
+            BudgetDocument budgetDocument = proposalBudgetService.getFinalBudgetVersion(pdDoc);
             if (budgetDocument != null) {
                 budget = budgetDocument.getBudget();
             }
         }
-        catch (S2SException e) {
+        catch (WorkflowException e) {
             LOG.error(e.getMessage(), e);
             return rrFedNonFedBudgetDocument;
         }
@@ -153,9 +153,9 @@ public class RRFedNonFedBudgetV1_1Generator extends RRFedNonFedBudgetBaseGenerat
      */
     private BudgetYearDataType getBudgetYearDataType(BudgetPeriodInfo periodInfo) {
 
-        BudgetDecimal totalDirectCostSharing = BudgetDecimal.ZERO;
-        BudgetDecimal totalIndirectCostSharing = BudgetDecimal.ZERO;
-        BudgetDecimal directCostsTotal = BudgetDecimal.ZERO;
+        ScaleTwoDecimal totalDirectCostSharing = ScaleTwoDecimal.ZERO;
+        ScaleTwoDecimal totalIndirectCostSharing = ScaleTwoDecimal.ZERO;
+        ScaleTwoDecimal directCostsTotal = ScaleTwoDecimal.ZERO;
         BudgetYearDataType budgetYear = BudgetYearDataType.Factory.newInstance();
         if (periodInfo != null) {
             budgetYear.setBudgetPeriodStartDate(s2sUtilService.convertDateToCalendar(periodInfo.getStartDate()));
@@ -246,7 +246,7 @@ public class RRFedNonFedBudgetV1_1Generator extends RRFedNonFedBudgetBaseGenerat
      */
     private BudgetSummary getBudgetSummary(BudgetSummaryInfo budgetSummaryData) {
 
-        BudgetDecimal cumTotalDirectCostSharing = BudgetDecimal.ZERO;
+        ScaleTwoDecimal cumTotalDirectCostSharing = ScaleTwoDecimal.ZERO;
         BudgetSummary budgetSummary = BudgetSummary.Factory.newInstance();
         SummaryDataType summarySeniorKey = SummaryDataType.Factory.newInstance();
         SummaryDataType summaryPersonnel = SummaryDataType.Factory.newInstance();
@@ -718,8 +718,8 @@ public class RRFedNonFedBudgetV1_1Generator extends RRFedNonFedBudgetBaseGenerat
     private BudgetYear1DataType getBudgetYear1DataType(BudgetPeriodInfo periodInfo) {
 
         BudgetYear1DataType budgetYear = BudgetYear1DataType.Factory.newInstance();
-        BudgetDecimal totalDirectCostSharing = BudgetDecimal.ZERO;
-        BudgetDecimal totalIndirectCostSharing = BudgetDecimal.ZERO;
+        ScaleTwoDecimal totalDirectCostSharing = ScaleTwoDecimal.ZERO;
+        ScaleTwoDecimal totalIndirectCostSharing = ScaleTwoDecimal.ZERO;
         if (periodInfo != null) {
             budgetYear.setBudgetPeriodStartDate(s2sUtilService.convertDateToCalendar(periodInfo.getStartDate()));
             budgetYear.setBudgetPeriodEndDate(s2sUtilService.convertDateToCalendar(periodInfo.getEndDate()));
@@ -1768,7 +1768,7 @@ public class RRFedNonFedBudgetV1_1Generator extends RRFedNonFedBudgetBaseGenerat
 
         KeyPersonCompensationDataType keyPersonCompensation = KeyPersonCompensationDataType.Factory.newInstance();
         BudgetService budgetService = KcServiceLocator.getService(BudgetService.class);
-        BudgetDecimal baseSalaryByPeriod; 
+        ScaleTwoDecimal baseSalaryByPeriod;
         if (keyPerson != null) {
             if (keyPerson.getAcademicMonths() != null) {
                 keyPersonCompensation.setAcademicMonths(keyPerson.getAcademicMonths().bigDecimalValue());
@@ -1798,7 +1798,7 @@ public class RRFedNonFedBudgetV1_1Generator extends RRFedNonFedBudgetBaseGenerat
             }
             keyPersonCompensation.setTotal(totalDataType);
             if (pdDoc.getBudgetDocumentVersions() != null) {
-                baseSalaryByPeriod = budgetService.getBaseSalaryByPeriod(pdDoc.getBudgetDocumentVersion(0)
+                baseSalaryByPeriod = s2sBudgetCalculatorService.getBaseSalaryByPeriod(pdDoc.getBudgetDocumentVersion(0)
                         .getBudgetVersionOverview().getBudgetId(), budgetPeriod, keyPerson);
                 if (baseSalaryByPeriod != null) {
                     keyPersonCompensation.setBaseSalary(baseSalaryByPeriod.bigDecimalValue());

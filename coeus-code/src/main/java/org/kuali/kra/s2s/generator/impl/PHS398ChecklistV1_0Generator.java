@@ -27,16 +27,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlbeans.XmlObject;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
+import org.kuali.coeus.common.framework.rolodex.RolodexService;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.budget.core.Budget;
 import org.kuali.kra.budget.distributionincome.BudgetProjectIncome;
 import org.kuali.kra.proposaldevelopment.bo.Narrative;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.questionnaire.answer.Answer;
 import org.kuali.kra.questionnaire.answer.AnswerHeader;
-import org.kuali.kra.s2s.S2SException;
 import org.kuali.kra.s2s.util.S2SConstants;
-import org.kuali.rice.krad.service.BusinessObjectService;
+import org.kuali.rice.kew.api.exception.WorkflowException;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -88,7 +88,7 @@ public class PHS398ChecklistV1_0Generator extends PHS398ChecklistBaseGenerator {
 		}
 		phsChecklist.setApplicationType(appEnum);
 
-		String federalId = s2sUtilService.getFederalId(pdDoc);
+		String federalId = proposalDevelopmentService.getFederalId(pdDoc);
 		if (federalId != null) {
 			phsChecklist.setFederalID(federalId);
 		}
@@ -97,8 +97,8 @@ public class PHS398ChecklistV1_0Generator extends PHS398ChecklistBaseGenerator {
         if (S2SConstants.PROPOSAL_YNQ_ANSWER_Y.equals(pIChange)) {
             phsChecklist.setIsChangeOfPDPI(YesNoDataType.YES);
             if (pIChangeExplanation != null) {
-                BusinessObjectService businessObjectService = KcServiceLocator.getService(BusinessObjectService.class);
-                Rolodex rolodex = businessObjectService.findBySinglePrimaryKey(Rolodex.class, pIChangeExplanation);
+                RolodexService rolodexService = KcServiceLocator.getService(RolodexService.class);
+                Rolodex rolodex = rolodexService.getRolodex(Integer.valueOf(pIChangeExplanation));
                 HumanNameDataType formerPDName = globLibV10Generator
                         .getHumanNameDataType(rolodex);
                 if (formerPDName != null
@@ -154,9 +154,9 @@ public class PHS398ChecklistV1_0Generator extends PHS398ChecklistBaseGenerator {
         }
 		Budget budget = null;
 		try {
-			budget = s2sBudgetCalculatorService.getFinalBudgetVersion(pdDoc)
+			budget = proposalBudgetService.getFinalBudgetVersion(pdDoc)
 					.getBudget();
-		} catch (S2SException e) {
+		} catch (WorkflowException e) {
 			LOG.error(e.getMessage(), e);
 			return phsChecklistDocument;
 		}

@@ -20,19 +20,19 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kuali.coeus.common.framework.version.VersionException;
+import org.kuali.coeus.common.framework.version.VersionStatus;
 import org.kuali.coeus.common.framework.version.VersioningService;
+import org.kuali.coeus.common.framework.version.history.VersionHistory;
+import org.kuali.coeus.common.framework.version.history.VersionHistoryService;
 import org.kuali.kra.award.home.Award;
-import org.kuali.kra.bo.versioning.VersionHistory;
-import org.kuali.kra.bo.versioning.VersionStatus;
 import org.kuali.kra.infrastructure.Constants;
-import org.kuali.kra.service.VersionHistoryService;
 import org.kuali.kra.subaward.bo.SubAward;
 import org.kuali.kra.subaward.bo.SubAwardAmountInfo;
 import org.kuali.kra.subaward.bo.SubAwardAmountReleased;
 import org.kuali.kra.subaward.bo.SubAwardFundingSource;
 import org.kuali.kra.subaward.document.SubAwardDocument;
 import org.kuali.kra.subaward.service.SubAwardService;
-import org.kuali.rice.core.api.util.type.KualiDecimal;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
 import org.kuali.rice.coreservice.framework.parameter.ParameterService;
 import org.kuali.rice.kew.api.document.DocumentStatus;
 import org.kuali.rice.kew.api.exception.WorkflowException;
@@ -197,9 +197,9 @@ public class SubAwardServiceImpl implements SubAwardService {
 
         List<SubAwardAmountInfo> subAwardAmountInfoList = subAward.getSubAwardAmountInfoList();
         List<SubAwardAmountReleased> subAwardAmountReleasedList = subAward.getSubAwardAmountReleasedList();
-        KualiDecimal totalObligatedAmount = new KualiDecimal(0.00);
-        KualiDecimal totalAnticipatedAmount = new KualiDecimal(0.00);
-        KualiDecimal totalAmountReleased = new KualiDecimal(0.00);
+        ScaleTwoDecimal totalObligatedAmount = new ScaleTwoDecimal(0.00);
+        ScaleTwoDecimal totalAnticipatedAmount = new ScaleTwoDecimal(0.00);
+        ScaleTwoDecimal totalAmountReleased = new ScaleTwoDecimal(0.00);
         if (subAwardAmountInfoList != null && subAwardAmountInfoList.size() > 0) {
             for (SubAwardAmountInfo subAwardAmountInfo: subAwardAmountInfoList) {
                 if (subAwardAmountInfo.getObligatedChange() != null) {

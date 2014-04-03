@@ -18,12 +18,14 @@ package org.kuali.kra.s2s.generator.impl;
 import gov.grants.apply.forms.cd511V11.CD511Document;
 import gov.grants.apply.forms.cd511V11.CD511Document.CD511;
 import org.apache.xmlbeans.XmlObject;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.s2s.generator.S2SBaseFormGenerator;
 import org.kuali.kra.s2s.generator.bo.DepartmentalPerson;
 import org.kuali.kra.s2s.service.S2SUtilService;
 import org.kuali.kra.s2s.util.S2SConstants;
+
+import java.util.Calendar;
 
 /**
  * 
@@ -76,7 +78,7 @@ public class CD511V1_1Generator extends S2SBaseFormGenerator {
         // As per Coeus,CD511-V1.1 data analysis file said:
         // if this application is submitted through Grants.gov leave signature to blank
         cd511.setSignature("  ");
-        cd511.setSubmittedDate(s2sUtilService.getCurrentCalendar());
+        cd511.setSubmittedDate(Calendar.getInstance());
         cd511Document.setCD511(cd511);
         return cd511Document;
     }

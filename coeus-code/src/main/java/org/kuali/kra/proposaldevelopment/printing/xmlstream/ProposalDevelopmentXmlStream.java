@@ -55,14 +55,13 @@ import edu.mit.coeus.utils.xml.v2.sponsor.SPONSORDocument.SPONSOR;
 import edu.mit.coeus.utils.xml.v2.userUnit.UNITDocument.UNIT;
 import org.apache.xmlbeans.XmlObject;
 import org.kuali.coeus.common.framework.unit.Unit;
+import org.kuali.coeus.propdev.impl.ynq.ProposalYnq;
 import org.kuali.coeus.sys.framework.model.KcPersistableBusinessObjectBase;
-import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.budget.core.Budget;
 import org.kuali.kra.budget.parameters.BudgetPeriod;
 import org.kuali.kra.infrastructure.Constants;
 import org.kuali.kra.proposaldevelopment.bo.*;
 import org.kuali.kra.proposaldevelopment.specialreview.ProposalSpecialReview;
-import org.kuali.kra.s2s.service.S2SUtilService;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -125,7 +124,6 @@ public class ProposalDevelopmentXmlStream extends ProposalBaseStream {
         proposal.setCURDATE(getCURDATE());
         proposal.setLOGOPATH(getLOGOPATH());
         proposalDocument.setPROPOSAL(proposal); 
-     // proposalDocument.set(getPROPRATES());
         Map<String, XmlObject> xmlObjectList = new LinkedHashMap<String, XmlObject>();
         xmlObjectList.put("summary", proposalDocument);
         return xmlObjectList;
@@ -228,10 +226,6 @@ public class ProposalDevelopmentXmlStream extends ProposalBaseStream {
         return budgetMaster;
     }
 
-    public S2SUtilService gets2SUtilService() {
-        return KcServiceLocator.getService(S2SUtilService.class);
-    }
-    
     /**
      * 
      * This method generates Proposal Budget period details.
@@ -245,7 +239,7 @@ public class ProposalDevelopmentXmlStream extends ProposalBaseStream {
             budgetPeriod = BUDGETPERIOD.Factory.newInstance();
             budgetPeriod.setPROPOSALNUMBER(developmentProposal.getProposalNumber());
             BigDecimal numberOfMonths ;
-            numberOfMonths = (gets2SUtilService().getNumberOfMonths(budgetPeriodData.getStartDate(), budgetPeriodData.getEndDate())).bigDecimalValue();
+            numberOfMonths = (getNumberOfMonths(budgetPeriodData.getStartDate(), budgetPeriodData.getEndDate())).bigDecimalValue();
             budgetPeriod.setNOOFMONTHS(numberOfMonths);
             budgetPeriod.setBUDGETPERIODNUMBER(budgetPeriodData.getBudgetPeriod());
             budgetPeriod.setTOTALDIRECTCOST(budgetPeriodData.getTotalDirectCost().bigDecimalValue());

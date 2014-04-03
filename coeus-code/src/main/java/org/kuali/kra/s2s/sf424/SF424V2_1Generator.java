@@ -39,24 +39,26 @@ import org.kuali.coeus.common.framework.org.Organization;
 import org.kuali.coeus.common.framework.org.OrganizationYnq;
 import org.kuali.coeus.common.framework.org.type.OrganizationType;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
-import org.kuali.kra.budget.BudgetDecimal;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentUtils;
+import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
+import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.budget.core.Budget;
 import org.kuali.kra.budget.distributionincome.BudgetProjectIncome;
 import org.kuali.kra.budget.document.BudgetDocument;
 import org.kuali.kra.budget.nonpersonnel.BudgetLineItem;
 import org.kuali.kra.budget.nonpersonnel.BudgetLineItemCalculatedAmount;
 import org.kuali.kra.budget.parameters.BudgetPeriod;
-import org.kuali.kra.proposaldevelopment.ProposalDevelopmentUtils;
 import org.kuali.kra.proposaldevelopment.bo.Narrative;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
 import org.kuali.kra.proposaldevelopment.bo.ProposalSite;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
-import org.kuali.kra.s2s.S2SException;
-import org.kuali.kra.s2s.bo.S2sOpportunity;
-import org.kuali.kra.s2s.bo.S2sSubmissionType;
+import org.kuali.coeus.propdev.impl.s2s.S2sOpportunity;
+import org.kuali.coeus.propdev.impl.s2s.S2sSubmissionType;
 import org.kuali.kra.s2s.generator.bo.DepartmentalPerson;
 import org.kuali.kra.s2s.generator.impl.SF424BaseGenerator;
 import org.kuali.kra.s2s.util.S2SConstants;
+import org.kuali.rice.coreservice.framework.parameter.ParameterService;
+import org.kuali.rice.kew.api.exception.WorkflowException;
 
 /**
  * This Class is used to generate XML object for grants.gov SF424V2.1. This form is generated using XMLBean classes and is based on
@@ -70,7 +72,6 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
 
     private DepartmentalPerson aorInfo = null;
     private String applicantTypeOtherSpecify = null;
-    private String federalDebtExp;
     private String stateReviewDate = null;
     private String strReview = null;
     private static final String ORGANIZATION_YNQ_ANSWER_YES = "Y";
@@ -81,12 +82,17 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
     public static final int ADDITIONAL_CONGRESSIONAL_DISTRICTS_ATTACHMENT = 138;
 
 
+    protected ParameterService parameterService;
+
+    public SF424V2_1Generator() {
+        parameterService = KcServiceLocator.getService(ParameterService.class);
+    }
+
     /**
      * 
      * This method returns SF42421Document object based on proposal development document which contains the SF42421Document information
      * for a particular proposal
      * 
-     * @param proposalDevelopmentDocument (ProposalDevelopmentDocument)
      * @return SF42421Document {@link XmlObject} of type SF42421Document.
      */
     private SF42421Document getSF42421Doc() {
@@ -100,7 +106,6 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
      * This method gets SF42421 information for the form which includes informations regarding SubmissionTypeCode
      * ApplicationType,RevisionType,AgencyName,ApplicantID,CFDANumber,FederalEntityIdentifier,AuthorizedRepresentative.
      * 
-     * @param proposalDevelopmentDocument (ProposalDevelopmentDocument)
      * @return sf424V21 object containing applicant and application details.
      */
     private SF42421 getSF42421() {
@@ -117,19 +122,19 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
             ApplicationType.Enum applicationTypeEnum = null;
             if (pdDoc.getDevelopmentProposal().getProposalTypeCode() != null) {
                 String proposalTypeCode = pdDoc.getDevelopmentProposal().getProposalTypeCode();
-                if (ProposalDevelopmentUtils.getProposalDevelopmentDocumentParameter(
+                if (parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
                         ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_NEW_PARM).equals(proposalTypeCode)) {
 			        applicationTypeEnum = ApplicationType.NEW;
-                } else if (ProposalDevelopmentUtils.getProposalDevelopmentDocumentParameter(
+                } else if (parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
                         ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_RESUBMISSION_PARM).equals(proposalTypeCode)) {
 					applicationTypeEnum = ApplicationType.REVISION;
-                } else if (ProposalDevelopmentUtils.getProposalDevelopmentDocumentParameter(
+                } else if (parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
                         ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_RENEWAL_PARM).equals(proposalTypeCode)) {
                     applicationTypeEnum = ApplicationType.CONTINUATION;
-                } else if (ProposalDevelopmentUtils.getProposalDevelopmentDocumentParameter(
+                } else if (parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
                         ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_CONTINUATION_PARM).equals(proposalTypeCode)) {
                     applicationTypeEnum = ApplicationType.CONTINUATION;
-                } else if (ProposalDevelopmentUtils.getProposalDevelopmentDocumentParameter(
+                } else if (parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class,
                         ProposalDevelopmentUtils.PROPOSAL_TYPE_CODE_REVISION_PARM).equals(proposalTypeCode)) {
                     applicationTypeEnum = ApplicationType.REVISION;
                 }
@@ -174,9 +179,9 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
                 }
             }
         }
-        sf424V21.setDateReceived(s2sUtilService.getCurrentCalendar());
+        sf424V21.setDateReceived(Calendar.getInstance());
         sf424V21.setApplicantID(pdDoc.getDevelopmentProposal().getProposalNumber());
-		String federalId = s2sUtilService.getFederalId(pdDoc);
+		String federalId = proposalDevelopmentService.getFederalId(pdDoc);
 		if (federalId != null) {
         	sf424V21.setFederalEntityIdentifier(federalId);
 		}
@@ -313,9 +318,9 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
 
         Budget budget = null;
         try {
-            BudgetDocument budgetDocument = s2sBudgetCalculatorService.getFinalBudgetVersion(pdDoc);
+            BudgetDocument budgetDocument = proposalBudgetService.getFinalBudgetVersion(pdDoc);
             budget = budgetDocument == null ? null : budgetDocument.getBudget();
-        } catch (S2SException e) {
+        } catch (WorkflowException e) {
             LOG.error(e.getMessage(), e);
             return sf424V21;
 
@@ -324,8 +329,8 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
             if (budget.getTotalCost() != null) {
                 sf424V21.setFederalEstimatedFunding(budget.getTotalCost().bigDecimalValue());
             }
-            BudgetDecimal fedNonFedCost = budget.getTotalCost();
-            BudgetDecimal costSharingAmount = BudgetDecimal.ZERO;
+            ScaleTwoDecimal fedNonFedCost = budget.getTotalCost();
+            ScaleTwoDecimal costSharingAmount = ScaleTwoDecimal.ZERO;
 
             for (BudgetPeriod budgetPeriod : budget.getBudgetPeriods()) {
                 for (BudgetLineItem lineItem : budgetPeriod.getBudgetLineItems()) {
@@ -350,12 +355,12 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
             }
             sf424V21.setProgramIncomeEstimatedFunding(projectIncome);
 
-            BudgetDecimal totalEstimatedAmount = BudgetDecimal.ZERO;
+            ScaleTwoDecimal totalEstimatedAmount = ScaleTwoDecimal.ZERO;
             if (budget.getTotalCost() != null) {
                 totalEstimatedAmount = totalEstimatedAmount.add(budget.getTotalCost());
             }
             totalEstimatedAmount = totalEstimatedAmount.add(costSharingAmount);
-            totalEstimatedAmount = totalEstimatedAmount.add(new BudgetDecimal(projectIncome));
+            totalEstimatedAmount = totalEstimatedAmount.add(new ScaleTwoDecimal(projectIncome));
             sf424V21.setTotalEstimatedFunding(totalEstimatedAmount.bigDecimalValue());
         } else {
             sf424V21.setFederalEstimatedFunding(BigDecimal.ZERO);
@@ -385,7 +390,6 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
                             yesNo = YesNoDataType.N_NO;
                         }
                     }
-                    federalDebtExp = orgYnq.getExplanation();
                 }
             }
         }
@@ -416,7 +420,7 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
         sf424V21.setAuthorizedRepresentativeEmail(aorInfo.getEmailAddress());
         sf424V21.setAuthorizedRepresentativeFax(aorInfo.getFaxNumber());
         sf424V21.setAORSignature(aorInfo.getFullName());
-        sf424V21.setDateSigned(s2sUtilService.getCurrentCalendar());
+        sf424V21.setDateSigned(Calendar.getInstance());
         return sf424V21;
     }
 
@@ -516,7 +520,6 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
      * 
      * This method returns StateReviewCode status for the application.StateReviewCode can be Not covered,Not reviewed
      * 
-     * @param proposalDevelopmentDocument (ProposalDevelopmentDocument)
      * @return stateType (StateReview.Enum) corresponding to state review code.
      */
     private StateReview.Enum getStateReviewCode() {
@@ -546,7 +549,6 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
      * 
      * This method is used to get List of project title attachments from NarrativeAttachmentList
      * 
-     * @param proposalDevelopmentDocument(ProposalDevelopmentDocument)
      * @return AttachedFileDataType[] array of attachments for project title attachment type.
      */
     private AttachedFileDataType[] getAttachedFileDataTypes() {
@@ -565,7 +567,7 @@ public class SF424V2_1Generator extends SF424BaseGenerator {
     }
    
     /**
-     * This method creates {@link XmlObject} of type {@link SF424Document} by populating data from the given
+     * This method creates {@link XmlObject} of type {@link SF42421Document} by populating data from the given
      * {@link ProposalDevelopmentDocument}
      * 
      * @param proposalDevelopmentDocument for which the {@link XmlObject} needs to be created

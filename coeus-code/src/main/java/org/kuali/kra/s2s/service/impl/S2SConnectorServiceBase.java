@@ -18,24 +18,23 @@ package org.kuali.kra.s2s.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.attachment.AttachmentImpl;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.FiltersType;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
-import org.apache.cxf.interceptor.AttachmentOutInterceptor;
-import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
-import org.apache.cxf.message.Message;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.kra.infrastructure.Constants;
 import org.kuali.kra.infrastructure.KeyConstants;
 import org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal;
 import org.kuali.kra.s2s.S2SException;
 import org.kuali.kra.s2s.service.S2SConnectorService;
 import org.kuali.kra.s2s.service.S2SUtilService;
-import org.kuali.rice.krad.service.BusinessObjectService;
+import org.kuali.rice.core.api.config.property.ConfigurationService;
+import org.kuali.rice.coreservice.framework.parameter.ParameterService;
+import org.kuali.rice.krad.data.DataObjectService;
 
 import gov.grants.apply.services.applicantwebservices_v2.GetApplicationListRequest;
 import gov.grants.apply.services.applicantwebservices_v2.GetApplicationListResponse;
@@ -69,10 +68,10 @@ import java.util.*;
 public class S2SConnectorServiceBase implements S2SConnectorService {
     protected static final Log LOG = LogFactory.getLog(S2SConnectorServiceBase.class);
     private S2SUtilService s2SUtilService;
-    private BusinessObjectService businessObjectService;
-    private static final String KEY_PROPOSAL_NUMBER = "proposalNumber";
+    private ConfigurationService configurationService;
+    private DataObjectService dataObjectService;
+    private ParameterService parameterService;
     private static final String MULTI_CAMPUS_ENABLED = "MULTI_CAMPUS_ENABLED";
-    private static final String MULTI_CAMPUS_ENABLED_VALUE = "1";
     private static final String KEY_OPPORTUNITY_ID = "OpportunityID";
     private static final String KEY_CFDA_NUMBER = "CFDANumber";
     private static final String KEY_SUBMISSION_TITLE = "SubmissionTitle";
@@ -83,7 +82,7 @@ public class S2SConnectorServiceBase implements S2SConnectorService {
     
     /**
      * This method is to get Opportunity List for the given cfda number,opportunity Id and competition Id from the grants guv. It
-     * sets the given parameters on {@link GetOpportunityListRequest} object and passes it to the web service.
+     * sets the given parameters on {@link GetOpportunitiesRequest} object and passes it to the web service.
      * 
      * @param cfdaNumber of the opportunity.
      * @param opportunityId parameter for the opportunity.
@@ -93,19 +92,6 @@ public class S2SConnectorServiceBase implements S2SConnectorService {
      * @throws S2SException
      * @see org.kuali.kra.s2s.service.S2SConnectorService#getOpportunityList(java.lang.String, java.lang.String,
      *      java.lang.String)
-     */
-    /*
-     * ApplicantWebServicesPortType port = getApplicantPort();
-            GetOpportunitiesRequest request = new GetOpportunitiesRequest();
-            
-            request.setFundingOpportunityNumber( oppId );
-            request.setCFDANumber( cfda );
-            request.setCompetitionID( compId );
-     * GetOpportunitiesResponse response = port.getOpportunities(request);
-            List <OpportunityInfo> oppInfoList = response.getOpportunityInfo();
-            if( oppInfoList != null && oppInfoList.size() > 0) {    
-                StringBuilder sb = new StringBuilder();
-                for ( OpportunityInfo info : oppInfoList ) {
      */
     public GetOpportunitiesResponse getOpportunityList(String cfdaNumber, String opportunityId, String competitionId)
             throws S2SException {
@@ -240,14 +226,10 @@ public class S2SConnectorServiceBase implements S2SConnectorService {
      * @throws S2SException
      */
     protected ApplicantWebServicesPortType getApplicantIntegrationSoapPort(String proposalNumber) throws S2SException {
-        Map<String, String> proposalMap = new HashMap<String, String>();
-        proposalMap.put(KEY_PROPOSAL_NUMBER, proposalNumber);
-        DevelopmentProposal pdDoc = (DevelopmentProposal) businessObjectService.findByPrimaryKey(
-                DevelopmentProposal.class, proposalMap);
-        String multiCampusEnabledStr = s2SUtilService.getParameterValue(MULTI_CAMPUS_ENABLED);
-        boolean mulitCampusEnabled = multiCampusEnabledStr.equals(MULTI_CAMPUS_ENABLED_VALUE) ? true : false;
-        return configureApplicantIntegrationSoapPort(pdDoc.getApplicantOrganization().getOrganization().getDunsNumber(),
-                mulitCampusEnabled);
+        DevelopmentProposal pdDoc = dataObjectService.find(
+                DevelopmentProposal.class, proposalNumber);
+        Boolean multiCampusEnabled = parameterService.getParameterValueAsBoolean(ProposalDevelopmentDocument.class, MULTI_CAMPUS_ENABLED);
+        return configureApplicantIntegrationSoapPort(pdDoc.getApplicantOrganization().getOrganization().getDunsNumber(), multiCampusEnabled);
     }
     
 
@@ -325,14 +307,14 @@ public class S2SConnectorServiceBase implements S2SConnectorService {
                 KeyStore keyStoreAlias;
                 keyStoreAlias = KeyStore.getInstance(s2sCertificateReader.getJksType());
                 Certificate[] certificates = keyStore.getCertificateChain(alias);
-                Key key = keyStore.getKey(alias, s2SUtilService.getProperty(s2sCertificateReader.getKeyStorePassword()).toCharArray());
+                Key key = keyStore.getKey(alias, configurationService.getPropertyValueAsString(s2sCertificateReader.getKeyStorePassword()).toCharArray());
                 keyStoreAlias.load(null, null);
-                keyStoreAlias.setKeyEntry(alias, key, 
-                        s2SUtilService.getProperty(s2sCertificateReader.getKeyStorePassword()).toCharArray(), certificates);
-                keyManagerFactory.init(keyStoreAlias, 
-                        s2SUtilService.getProperty(s2sCertificateReader.getKeyStorePassword()).toCharArray());
+                keyStoreAlias.setKeyEntry(alias, key,
+                        configurationService.getPropertyValueAsString(s2sCertificateReader.getKeyStorePassword()).toCharArray(), certificates);
+                keyManagerFactory.init(keyStoreAlias,
+                        configurationService.getPropertyValueAsString(s2sCertificateReader.getKeyStorePassword()).toCharArray());
             }else {
-                keyManagerFactory.init(keyStore, s2SUtilService.getProperty(s2sCertificateReader.getKeyStorePassword()).toCharArray());
+                keyManagerFactory.init(keyStore, configurationService.getPropertyValueAsString(s2sCertificateReader.getKeyStorePassword()).toCharArray());
             }
             KeyManager[] km = keyManagerFactory.getKeyManagers();
             tlsConfig.setKeyManagers(km);
@@ -369,8 +351,8 @@ public class S2SConnectorServiceBase implements S2SConnectorService {
 
     protected String getS2SSoapHost() throws S2SException {
         StringBuilder host = new StringBuilder();
-        host.append(s2SUtilService.getProperty(getServiceHost()));
-        String port = s2SUtilService.getProperty(getServicePort());
+        host.append(configurationService.getPropertyValueAsString(getServiceHost()));
+        String port = configurationService.getPropertyValueAsString(getServicePort());
         if ((!host.toString().endsWith("/")) && (!port.startsWith("/"))) {
             host.append("/");
         }
@@ -378,31 +360,6 @@ public class S2SConnectorServiceBase implements S2SConnectorService {
         return host.toString();
     }
 
-    /**
-     * Sets the s2sUtilService attribute value.
-     * 
-     * @param generatorUtilService The s2sUtilService to set.
-     */
-    public void setS2SUtilService(S2SUtilService s2SUtilService) {
-        this.s2SUtilService = s2SUtilService;
-    }
-
-    /**
-     * This method is to set businessObjectService
-     * 
-     * @param businessObjectService(BusinessObjectService)
-     */
-    public void setBusinessObjectService(BusinessObjectService businessObjectService) {
-        this.businessObjectService = businessObjectService;
-    }
-
-    /**
-     * Gets the s2SUtilService attribute. 
-     * @return Returns the s2SUtilService.
-     */
-    public S2SUtilService getS2SUtilService() {
-        return s2SUtilService;
-    }
 
     public String getServiceHost() {
         return serviceHost;
@@ -426,5 +383,37 @@ public class S2SConnectorServiceBase implements S2SConnectorService {
 
     public void setS2sCertificateReader(S2SCertificateReader s2sCertificateReader) {
         this.s2sCertificateReader = s2sCertificateReader;
+    }
+
+    public S2SUtilService getS2SUtilService() {
+        return s2SUtilService;
+    }
+
+    public void setS2SUtilService(S2SUtilService s2SUtilService) {
+        this.s2SUtilService = s2SUtilService;
+    }
+
+    public DataObjectService getDataObjectService() {
+        return dataObjectService;
+    }
+
+    public void setDataObjectService(DataObjectService dataObjectService) {
+        this.dataObjectService = dataObjectService;
+    }
+
+    public ParameterService getParameterService() {
+        return parameterService;
+    }
+
+    public void setParameterService(ParameterService parameterService) {
+        this.parameterService = parameterService;
+    }
+
+    public ConfigurationService getConfigurationService() {
+        return configurationService;
+    }
+
+    public void setConfigurationService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
     }
 }

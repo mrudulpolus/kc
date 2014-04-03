@@ -24,18 +24,17 @@ import org.kuali.coeus.common.framework.org.Organization;
 import org.kuali.coeus.common.framework.org.type.OrganizationType;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
 import org.kuali.coeus.common.framework.sponsor.Sponsor;
+import org.kuali.coeus.common.framework.sponsor.SponsorService;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.proposaldevelopment.bo.ProposalAbstract;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
-import org.kuali.kra.s2s.bo.S2sOpportunity;
+import org.kuali.coeus.propdev.impl.s2s.S2sOpportunity;
 import org.kuali.kra.s2s.generator.bo.DepartmentalPerson;
 import org.kuali.kra.s2s.util.S2SConstants;
-import org.kuali.rice.krad.service.BusinessObjectService;
 
-import java.util.HashMap;
+import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This Class is used to generate XML object for grants.gov SF424ShortV1_0. This form is generated using XMLBean classes and is
@@ -46,7 +45,6 @@ import java.util.Map;
 public class SF424ShortV1_0Generator extends SF424BaseGenerator {
 
     private String applicantTypeOtherSpecify = null;
-    private static final String SPONSOR_CODE = "sponsorCode";
     private static final String ABSTRACT_TYPE_PROJECT_DESCRIPTION = "1";
     private static final int SPONSOR_NAME_MAX_LENGTH = 60;
     private static final int CFDA_NUMBER_MAX_LENGTH = 15;
@@ -56,7 +54,7 @@ public class SF424ShortV1_0Generator extends SF424BaseGenerator {
     private static final int OFFICE_PHONE_MAX_LENGTH = 25;
     private static final int EMAIL_ADDRESS_MAX_LENGTH = 60;
     private static final int FAX_NUMBER_MAX_LENGTH = 25;
-    private BusinessObjectService businessObjectService = KcServiceLocator.getService(BusinessObjectService.class);
+    private SponsorService sponsorService = KcServiceLocator.getService(SponsorService.class);
 
     /**
      * 
@@ -82,9 +80,7 @@ public class SF424ShortV1_0Generator extends SF424BaseGenerator {
         sf424Short.setAuthorizedRepresentativePhoneNumber("");
         sf424Short.setAuthorizedRepresentativeEmail("");
 
-        Map<String, String> sponsorMap = new HashMap<String, String>();
-        sponsorMap.put(SPONSOR_CODE, pdDoc.getDevelopmentProposal().getPrimeSponsorCode());
-        Sponsor sponsor = (Sponsor) businessObjectService.findByPrimaryKey(Sponsor.class, sponsorMap);
+        Sponsor sponsor = sponsorService.getSponsor(pdDoc.getDevelopmentProposal().getPrimeSponsorCode());
         if (pdDoc.getDevelopmentProposal().getSponsor() != null && pdDoc.getDevelopmentProposal().getSponsor().getSponsorName() != null) {
             if (pdDoc.getDevelopmentProposal().getSponsor().getSponsorName().length() > SPONSOR_NAME_MAX_LENGTH) {
                 sf424Short.setAgencyName(pdDoc.getDevelopmentProposal().getSponsor().getSponsorName().substring(0, SPONSOR_NAME_MAX_LENGTH));
@@ -119,7 +115,7 @@ public class SF424ShortV1_0Generator extends SF424BaseGenerator {
                 sf424Short.setCFDAProgramTitle(pdDoc.getDevelopmentProposal().getProgramAnnouncementTitle());
             }
         }
-        sf424Short.setDateReceived(s2sUtilService.getCurrentCalendar());
+        sf424Short.setDateReceived(Calendar.getInstance());
         S2sOpportunity s2sOpportunity = pdDoc.getDevelopmentProposal().getS2sOpportunity();
         if (s2sOpportunity != null) {
             s2sOpportunity.refreshNonUpdateableReferences();
@@ -241,7 +237,7 @@ public class SF424ShortV1_0Generator extends SF424BaseGenerator {
             }
         }
         sf424Short.setAuthorizedRepresentativeSignature(aorInfo.getFullName());
-        sf424Short.setAuthorizedRepresentativeDateSigned(s2sUtilService.getCurrentCalendar());
+        sf424Short.setAuthorizedRepresentativeDateSigned(Calendar.getInstance());
         sf424ShortDocument.setSF424Short(sf424Short);
         return sf424ShortDocument;
     }

@@ -16,17 +16,18 @@
 package org.kuali.kra.proposaldevelopment.printing.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.kuali.coeus.common.framework.print.AbstractPrint;
+import org.kuali.coeus.common.framework.print.Printable;
+import org.kuali.coeus.common.framework.print.PrintingException;
+import org.kuali.coeus.common.framework.print.PrintingService;
+import org.kuali.coeus.common.framework.sponsor.form.SponsorFormTemplate;
+import org.kuali.coeus.common.framework.sponsor.form.SponsorFormTemplateList;
+import org.kuali.coeus.common.framework.sponsor.form.SponsorForms;
+import org.kuali.coeus.common.framework.sponsor.hierarchy.SponsorHierarchy;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.model.KcPersistableBusinessObjectBase;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.kra.bo.SponsorFormTemplate;
-import org.kuali.kra.bo.SponsorFormTemplateList;
-import org.kuali.kra.bo.SponsorForms;
-import org.kuali.kra.bo.SponsorHierarchy;
 import org.kuali.kra.infrastructure.Constants;
-import org.kuali.kra.printing.Printable;
-import org.kuali.kra.printing.PrintingException;
-import org.kuali.kra.printing.print.AbstractPrint;
-import org.kuali.kra.printing.service.PrintingService;
 import org.kuali.kra.proposaldevelopment.bo.AttachmentDataSource;
 import org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
@@ -36,7 +37,6 @@ import org.kuali.kra.proposaldevelopment.printing.service.ProposalDevelopmentPri
 import org.kuali.kra.proposaldevelopment.questionnaire.ProposalPersonQuestionnaireHelper;
 import org.kuali.kra.questionnaire.answer.AnswerHeader;
 import org.kuali.kra.questionnaire.print.QuestionnairePrint;
-import org.kuali.kra.s2s.service.S2SUtilService;
 import org.kuali.rice.coreservice.framework.parameter.ParameterService;
 import org.kuali.rice.krad.service.BusinessObjectService;
 
@@ -55,7 +55,6 @@ public class ProposalDevelopmentPrintingServiceImpl implements
 	private PrintCertificationPrint printCertificationPrint;
 	private ProposalSponsorFormsPrint proposalSponsorFormsPrint;
 	private PrintingService printingService;
-	private S2SUtilService s2SUtilService;
 	private BusinessObjectService businessObjectService;
 	private ParameterService parameterService;
 	private static final String SPONSOR_CODE_DB_KEY = "sponsorCode";
@@ -134,11 +133,9 @@ public class ProposalDevelopmentPrintingServiceImpl implements
         if (sponsorFormTemplates.isEmpty()) {
             Collection<SponsorFormTemplateList> clsponsorFormTemplates = getSponsorTemplatesList(sponsorCode);
             sponsorFormTemplates.addAll(clsponsorFormTemplates);
-            if(!s2SUtilService
-                    .getParameterValue(Constants.LOCAL_PRINT_FORM_SPONSOR_CODE).equals(sponsorCode)){
-            String genericSponsorCode = s2SUtilService
-                    .getParameterValue(Constants.GENERIC_SPONSOR_CODE);
-            clsponsorFormTemplates = getSponsorTemplatesList(genericSponsorCode);
+            if(!parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class, Constants.LOCAL_PRINT_FORM_SPONSOR_CODE).equals(sponsorCode)){
+                String genericSponsorCode = parameterService.getParameterValueAsString(ProposalDevelopmentDocument.class, Constants.GENERIC_SPONSOR_CODE);
+                clsponsorFormTemplates = getSponsorTemplatesList(genericSponsorCode);
             }
             sponsorFormTemplates.addAll(clsponsorFormTemplates);
         } else {
@@ -267,25 +264,6 @@ public class ProposalDevelopmentPrintingServiceImpl implements
 	public void setPrintCertificationPrint(
 			PrintCertificationPrint printCertificationPrint) {
 		this.printCertificationPrint = printCertificationPrint;
-	}
-
-	/**
-	 * Gets the s2SUtilService attribute.
-	 * 
-	 * @return Returns the s2SUtilService.
-	 */
-	public S2SUtilService getS2SUtilService() {
-		return s2SUtilService;
-	}
-
-	/**
-	 * Sets the s2SUtilService attribute value.
-	 * 
-	 * @param utilService
-	 *            The s2SUtilService to set.
-	 */
-	public void setS2SUtilService(S2SUtilService utilService) {
-		s2SUtilService = utilService;
 	}
 
 	/**

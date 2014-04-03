@@ -17,13 +17,13 @@
 	<bean id="PropDev-DefaultView-parentBean" abstract="true"
 		parent="Uif-TransactionalDocumentView" p:headerText="Proposal Development Document"
 		p:formClass="org.kuali.kra.proposaldevelopment.web.krad.ProposalDevelopmentDocumentForm"
-		p:documentClass="org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument"
-		p:viewHelperServiceClass="org.kuali.kra.proposaldevelopment.web.krad.ProposalDevelopmentViewHelperServiceImpl"
+		p:documentClass="org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument"
+		p:viewHelperServiceClass="org.kuali.coeus.propdev.impl.core.ProposalDevelopmentViewHelperServiceImpl"
 		p:stickyApplicationHeader="true" p:stickyFooter="true"
 		p:breadcrumbs.render="false" p:cssClasses="uif-formView"
 		p:unifiedHeader="false" p:defaultBindingObjectPath=""
-		p:additionalScriptFiles="scripts/kradQuestionnaireAnswer.js,scripts/proposaldevelopment.js"
-		p:additionalCssFiles="css/proposaldevelopment.css">
+		p:additionalScriptFiles="rice-contrib/plugins/jquery.multiselect/jquery.multiselect.min.js,rice-contrib/plugins/jquery.multiselect/jquery.multiselect.filter.min.js,rice-contrib/multiselect.js,scripts/kradQuestionnaireAnswer.js,scripts/proposaldevelopment.js"
+		p:additionalCssFiles="rice-contrib/plugins/jquery.multiselect/jquery.multiselect.css,rice-contrib/plugins/jquery.multiselect/jquery.multiselect.filter.css,rice-contrib/multiselect.css,css/proposaldevelopment.css">
 		<property name="header" ref="PropDev-DocumentHeader" />
 		<property name="footer" ref="PropDev-DocumentFooter" />
 		<property name="navigation" ref="PropDev-Menu" />
@@ -40,8 +40,8 @@
 				<ref bean="PropDev-AbstractsPage" />
 				<ref bean="PropDev-NotesPage" />
 				<ref bean="PropDev-QuestionnairePage" />
-				<bean id="PropDev-DeliveryInfo" parent="PropDev-UnderDevelopmentPage" />
-				<bean id="PropDev-SponsorProgramInfo" parent="PropDev-UnderDevelopmentPage" />
+				<ref bean="PropDev-SponsorProgramInfoPage" />
+				<ref bean="PropDev-DeliveryInfoPage" />
 				<bean id="PropDev-CreditAllocation" parent="PropDev-UnderDevelopmentPage" />
 				<bean id="PropDev-Budget-Summary" parent="PropDev-UnderDevelopmentPage" />
 				<bean id="PropDev-Budget-Parameters" parent="PropDev-UnderDevelopmentPage" />
@@ -110,9 +110,9 @@
 					p:actionLabel="Proposal Details" p:order="10" />
 				<bean parent="Uif-MenuAction" p:navigateToPageId="PropDev-OpportunitySearchPage"
 					p:actionLabel="S2S Opportunity Search" p:order="20" />
-				<bean parent="Uif-MenuAction" p:navigateToPageId="PropDev-DeliveryInfo"
+				<bean parent="Uif-MenuAction" p:navigateToPageId="PropDev-DeliveryInfoPage"
 					p:actionLabel="Delivery Info" p:order="30" />
-				<bean parent="Uif-MenuAction" p:navigateToPageId="PropDev-SponsorProgramInfo"
+				<bean parent="Uif-MenuAction" p:navigateToPageId="PropDev-SponsorProgramInfoPage"
 					p:actionLabel="Sponsor &amp; Program Information" p:order="40" />
 				<bean parent="Uif-MenuAction" p:navigateToPageId="PropDev-OrganizationLocationsPage"
 					p:actionLabel="Organization and Location" p:order="50" />

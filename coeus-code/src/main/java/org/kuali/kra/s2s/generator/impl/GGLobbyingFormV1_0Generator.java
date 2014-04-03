@@ -19,9 +19,11 @@ import gov.grants.apply.forms.ggLobbyingFormV10.LobbyingFormDocument;
 import gov.grants.apply.forms.ggLobbyingFormV10.LobbyingFormDocument.LobbyingForm;
 import org.apache.xmlbeans.XmlObject;
 import org.kuali.coeus.common.framework.org.Organization;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.kra.s2s.generator.bo.DepartmentalPerson;
 import org.kuali.kra.s2s.util.S2SConstants;
+
+import java.util.Calendar;
 
 /**
  * Class for generating the XML object for grants.gov GGLobbyingFormV1_0. Form is generated using XMLBean classes and is based on
@@ -79,7 +81,7 @@ public class GGLobbyingFormV1_0Generator extends GGLobbyingFormBaseGenerator {
         lobbyingForm.setAuthorizedRepresentativeTitle(authorizedRepresentativeTitle);
         lobbyingForm.setAuthorizedRepresentativeSignature(authorizedRepresentativeSignature);
         lobbyingForm.setAuthorizedRepresentativeName(globLibV10Generator.getHumanNameDataType(departmentalPerson));
-        lobbyingForm.setSubmittedDate(s2sUtilService.getCurrentCalendar());
+        lobbyingForm.setSubmittedDate(Calendar.getInstance());
         lobbyingFormDocument.setLobbyingForm(lobbyingForm);
         return lobbyingFormDocument;
     }

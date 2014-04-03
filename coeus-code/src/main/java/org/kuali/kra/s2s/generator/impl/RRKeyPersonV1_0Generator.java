@@ -28,14 +28,14 @@ import gov.grants.apply.system.attachmentsV10.AttachedFileDataType;
 import org.apache.xmlbeans.XmlObject;
 import org.kuali.coeus.common.framework.person.KcPerson;
 import org.kuali.coeus.common.framework.person.KcPersonService;
+import org.kuali.coeus.common.framework.sponsor.SponsorService;
+import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocument;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.proposaldevelopment.bo.DevelopmentProposal;
 import org.kuali.kra.proposaldevelopment.bo.Narrative;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPerson;
 import org.kuali.kra.proposaldevelopment.bo.ProposalPersonComparator;
-import org.kuali.kra.proposaldevelopment.document.ProposalDevelopmentDocument;
 import org.kuali.kra.s2s.util.S2SConstants;
-import org.kuali.kra.service.SponsorService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,21 +64,7 @@ public class RRKeyPersonV1_0Generator extends RRKeyPersonBaseGenerator {
         rrKeyPerson.setKeyPersonArray(getPersonProfileKeyPerson());
         saveKeyPersonAttachmentsToProposal();
         if (extraPersons.size() > 0) {
-//            for (ProposalPerson extraPerson : extraPersons) {
-//                BioSketchsAttached personBioSketch = BioSketchsAttached.Factory.newInstance();
-//                AttachedFileDataType bioSketchAttachment = getPernonnelAttachments(pdDoc, extraPerson.getPersonId(), extraPerson
-//                        .getRolodexId(), BIOSKETCH_TYPE);
-//                personBioSketch.setBioSketchAttached(bioSketchAttachment);
-//                rrKeyPerson.setBioSketchsAttached(personBioSketch);
-//
-//                AttachedFileDataType supportAttachment = getPernonnelAttachments(pdDoc, extraPerson.getPersonId(), extraPerson
-//                        .getRolodexId(), CURRENT_PENDING_TYPE);
-//                if (supportAttachment != null) {
-//                    SupportsAttached supportsAttached = SupportsAttached.Factory.newInstance();
-//                    supportsAttached.setSupportAttached(supportAttachment);
-//                    rrKeyPerson.setSupportsAttached(supportsAttached);
-//                }
-//            }
+
             AttachedFileDataType attachedFileDataType = null;
             BioSketchsAttached bioSketchAttached = BioSketchsAttached.Factory.newInstance();
     		for (Narrative narrative : pdDoc.getDevelopmentProposal().getNarratives()) {

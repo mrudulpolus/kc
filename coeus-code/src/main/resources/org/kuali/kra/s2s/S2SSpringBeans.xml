@@ -23,6 +23,7 @@
                            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
     <context:annotation-config />
+    <context:component-scan base-package="org.kuali.kra.s2s.depend" />
 
     <bean id="citizenshipTypeService" class="org.kuali.rice.core.framework.resourceloader.GlobalResourceLoaderServiceFactoryBean">
         <property name="serviceName" value="citizenshipTypeService" />
@@ -57,10 +58,6 @@
 	<bean id="s2SValidatorService"
 		class="org.kuali.kra.s2s.service.impl.S2SValidatorServiceImpl">
 	</bean>
-
-	<bean id="s2SProposalValidatorService"
-		class="org.kuali.kra.s2s.service.impl.S2SProposalValidatorServiceImpl">
-	</bean>
 	
 	
 	<bean id="s2SService"
@@ -71,20 +68,11 @@
 		<property name="s2SFormGeneratorService">
 			<ref bean="s2SFormGeneratorService" />
 		</property>
-		<property name="s2SProposalValidatorService">
-			<ref bean="s2SProposalValidatorService" />
-		</property>
 		<property name="s2SValidatorService">
 			<ref bean="s2SValidatorService" />
 		</property>
 		<property name="s2SUtilService">
 			<ref bean="s2SUtilService" />
-		</property>
-		<property name="printService">
-			<ref bean="printService" />
-		</property>
-		<property name="dateTimeService">
-			<ref bean="dateTimeService" />
 		</property>
 		<property name="configurationService" ref="kualiConfigurationService"/>
 	</bean>
@@ -111,17 +99,8 @@
 		<property name="businessObjectService">
 			<ref bean="businessObjectService" />
 		</property>
-		<property name="dateTimeService">
-			<ref bean="dateTimeService" />
-		</property>
-		<property name="kualiConfigurationService">
-			<ref bean="kualiConfigurationService" />
-		</property>
 		<property name="parameterService">
 			<ref bean="parameterService" />
-		</property>
-		<property name="proposalDevelopmentService">
-			<ref bean="proposalDevelopmentService" />
 		</property>
 		<property name="kcPersonService">
 			<ref bean="kcPersonService" />
@@ -145,15 +124,33 @@
 
 	<bean id="s2SBudgetCalculatorService"
 		class="org.kuali.kra.s2s.service.impl.S2SBudgetCalculatorServiceImpl">
-		<property name="businessObjectService">
-			<ref bean="businessObjectService" />
-		</property>
+        <property name="parameterService">
+            <ref bean="parameterService" />
+        </property>
 		<property name="s2SUtilService">
 			<ref bean="s2SUtilService" />
 		</property>
 		<property name="kcPersonService">
 			<ref bean="kcPersonService" />
 		</property>
+        <property name="toBeNamePersonService">
+            <ref bean="toBeNamePersonService" />
+        </property>
+        <property name="budgetCategoryMapService">
+            <ref bean="budgetCategoryMapService" />
+        </property>
+        <property name="proposalBudgetService">
+            <ref bean="proposalBudgetService" />
+        </property>
+        <property name="budgetPersonSalaryService">
+            <ref bean="budgetPersonSalaryService"/>
+        </property>
+        <property name="proposalDevelopmentService">
+            <ref bean="proposalDevelopmentService"/>
+        </property>
+        <property name="budgetPersonService">
+            <ref bean="budgetPersonService"/>
+        </property>
 	</bean>
 
 	<bean id="grantsGovConnectorService"
@@ -161,9 +158,15 @@
 		<property name="s2SUtilService">
 			<ref bean="s2SUtilService" />
 		</property>
-		<property name="businessObjectService">
-			<ref bean="businessObjectService" />
+		<property name="dataObjectService">
+			<ref bean="dataObjectService" />
 		</property>
+        <property name="parameterService">
+            <ref bean="parameterService" />
+        </property>
+        <property name="configurationService">
+            <ref bean="kualiConfigurationService" />
+        </property>
 		<property name="serviceHost" value="grants.gov.s2s.host"/>
 		<property name="servicePort" value="grants.gov.s2s.port"/>
 		<property name="s2sCertificateReader">
@@ -182,9 +185,15 @@
 		<property name="s2SUtilService">
 			<ref bean="s2SUtilService" />
 		</property>
-		<property name="businessObjectService">
-			<ref bean="businessObjectService" />
-		</property>
+        <property name="dataObjectService">
+            <ref bean="dataObjectService" />
+        </property>
+        <property name="parameterService">
+            <ref bean="parameterService" />
+        </property>
+        <property name="configurationService">
+            <ref bean="kualiConfigurationService" />
+        </property>
 		<property name="serviceHost" value="research.gov.s2s.host"/>
 		<property name="servicePort" value="research.gov.s2s.port"/>
 		<property name="s2sCertificateReader">
@@ -203,9 +212,6 @@
 		class="org.kuali.kra.s2s.polling.S2SPollingTask">
 		<property name="businessObjectService">
 			<ref bean="businessObjectService" />
-		</property>
-		<property name="dateTimeService">
-			<ref bean="dateTimeService" />
 		</property>
 		<property name="s2SService" >
   			<ref bean="s2SService"/>
@@ -231,9 +237,6 @@
 		<property name="businessObjectService">
 			<ref bean="businessObjectService" />
 		</property>
-		<property name="dateTimeService">
-			<ref bean="dateTimeService" />
-		</property>
 		<property name="s2SService" >
   			<ref bean="s2SService"/>
   		</property>
@@ -255,9 +258,6 @@
 		<property name="businessObjectService">
 			<ref bean="businessObjectService" />
 		</property>
-		<property name="dateTimeService">
-			<ref bean="dateTimeService" />
-		</property>
 		<property name="s2SService" >
   			<ref bean="s2SService"/>
   		</property>
@@ -278,9 +278,6 @@
 		class="org.kuali.kra.s2s.polling.S2SPollingTask">
 		<property name="businessObjectService">
 			<ref bean="businessObjectService" />
-		</property>
-		<property name="dateTimeService">
-			<ref bean="dateTimeService" />
 		</property>
 		<property name="s2SService" >
   			<ref bean="s2SService"/>
