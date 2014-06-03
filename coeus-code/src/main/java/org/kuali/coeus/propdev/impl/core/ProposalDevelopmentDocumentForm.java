@@ -23,6 +23,7 @@ import org.kuali.coeus.propdev.impl.datavalidation.ProposalDevelopmentDataValida
 import org.kuali.coeus.propdev.impl.person.creditsplit.ProposalCreditSplitListDto;
 import org.kuali.coeus.propdev.impl.questionnaire.ProposalDevelopmentQuestionnaireHelper;
 import org.kuali.coeus.propdev.impl.specialreview.SpecialReviewHelper;
+import org.kuali.coeus.propdev.impl.location.OrganizationAddWizardHelper;
 import org.kuali.coeus.propdev.impl.person.KeyPersonnelAddWizardHelper;
 import org.kuali.coeus.propdev.impl.s2s.S2sOpportunity;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
@@ -53,7 +54,7 @@ public class ProposalDevelopmentDocumentForm extends TransactionalDocumentFormBa
     private String selectedCustomDataGroup;
     private List<ProposalDevelopmentDataValidationItem> dataValidationItems;
     private boolean validateData;
-    private List<ProposalCreditSplitListDto> creditSplitListItems;
+    private OrganizationAddWizardHelper addOrganizationHelper;
 
     public ProposalDevelopmentDocumentForm() {
         super();
@@ -75,7 +76,7 @@ public class ProposalDevelopmentDocumentForm extends TransactionalDocumentFormBa
 
         dataValidationItems = new ArrayList<ProposalDevelopmentDataValidationItem>();
 
-        creditSplitListItems = new ArrayList<ProposalCreditSplitListDto>();
+        addOrganizationHelper = new OrganizationAddWizardHelper();
     }
 
     public int findIndexOfPageId(List<Action> actions) {
@@ -184,6 +185,15 @@ public class ProposalDevelopmentDocumentForm extends TransactionalDocumentFormBa
     public void setDataValidationItems(List<ProposalDevelopmentDataValidationItem> dataValidationItems) {
         this.dataValidationItems = dataValidationItems;
     }
+    
+    public OrganizationAddWizardHelper getAddOrganizationHelper() {
+		return addOrganizationHelper;
+	}
+
+	public void setAddOrganizationHelper(
+			OrganizationAddWizardHelper addOrganizationHelper) {
+		this.addOrganizationHelper = addOrganizationHelper;
+	}
 
     public boolean isValidateData() {
         return validateData;
@@ -191,14 +201,6 @@ public class ProposalDevelopmentDocumentForm extends TransactionalDocumentFormBa
 
     public void setValidateData(boolean validateData) {
         this.validateData = validateData;
-    }
-
-    public List<ProposalCreditSplitListDto> getCreditSplitListItems() {
-        return creditSplitListItems;
-    }
-
-    public void setCreditSplitListItems(List<ProposalCreditSplitListDto> creditSplitListItems) {
-        this.creditSplitListItems = creditSplitListItems;
     }
 
     public Tree<Object, String> getMedusaTreeView() {

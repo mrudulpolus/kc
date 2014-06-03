@@ -33,7 +33,7 @@
 				</list>
 			</property>
 	</bean>
-	
+
 	<bean id="PropDev-ApplicantOrganizationPage-Section" parent="PropDev-ApplicantOrganizationPage-Section-parentBean" />
 	<bean id="PropDev-ApplicantOrganizationPage-Section-parentBean"
 		parent="Uif-VerticalBoxSubSection" p:fieldBindingObjectPath="document.developmentProposal.applicantOrganization">
@@ -154,7 +154,7 @@
 			</list>
 		</property>
 	</bean>
-	
+
 	<bean id="PropDev-OtherOrganizationsPage-Details" parent="PropDev-OtherOrganizationsPage-Details-parentBean" />
 	<bean id="PropDev-OtherOrganizationsPage-Details-parentBean" abstract="true"
 		parent="Uif-StackedCollectionSection" p:headerText=""  
@@ -204,7 +204,7 @@
 			</list>
 		</property>		
 	</bean>	
-	
+
 	<bean id="PropDev-OtherOrganizationsPage-CongressionalDistricts" parent="PropDev-OtherOrganizationsPage-CongressionalDistricts-parentBean" />
 	<bean id="PropDev-OtherOrganizationsPage-CongressionalDistricts-parentBean" abstract="true" parent="PropDev-Attachment-Collection" 
 		p:collectionObjectClass="org.kuali.coeus.propdev.impl.location.CongressionalDistrict" p:propertyName="congressionalDistricts"
