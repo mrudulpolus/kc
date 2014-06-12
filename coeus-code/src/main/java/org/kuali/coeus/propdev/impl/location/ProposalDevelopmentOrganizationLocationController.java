@@ -1,6 +1,8 @@
 package org.kuali.coeus.propdev.impl.location;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,40 +11,55 @@ import org.apache.commons.lang.StringUtils;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
 import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentControllerBase;
 import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocumentForm;
-import org.kuali.coeus.propdev.impl.location.ProposalSite;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.rice.kns.lookup.LookupableHelperService;
-import org.kuali.rice.krad.uif.UifConstants;
+import org.kuali.rice.krad.service.BusinessObjectService;
 import org.kuali.rice.krad.uif.UifParameters;
 import org.kuali.rice.krad.web.form.DocumentFormBase;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-
+@SuppressWarnings({ "unchecked", "deprecation" })
 @Controller
 public class ProposalDevelopmentOrganizationLocationController extends ProposalDevelopmentControllerBase{
 	
 	
-	public LookupableHelperService rolodexLookupableHelperService;	
-	// deprecated method. need to extend LookupableImpl
+	public LookupableHelperService rolodexLookupableHelperService;		
+	private BusinessObjectService businessObjectService;
 	
 	
-	 @RequestMapping(value = "/proposalDevelopment", params="methodToCall=performOrganizationalSearch")
-	   public ModelAndView performOrganizationalSearch(@ModelAttribute("KualiForm") DocumentFormBase form, BindingResult result,
-	           HttpServletRequest request, HttpServletResponse response) throws Exception {
-		 	ProposalDevelopmentDocumentForm pdForm = (ProposalDevelopmentDocumentForm) form;
-		 	pdForm.getAddOrganizationHelper().getResults().clear();
-		 	getRolodexLookupableHelperService().setBusinessObjectClass(Rolodex.class);
-		 	List<Rolodex> results = (List<Rolodex>) getRolodexLookupableHelperService().getSearchResults(pdForm.getAddOrganizationHelper().getLookupFieldValues());		 	
-		 	pdForm.getAddOrganizationHelper().setResults(results);
-	     return getTransactionalDocumentControllerService().refresh(form, result, request, response);
-		
-	   }
+	 @SuppressWarnings({ })
+	@RequestMapping(value = "/proposalDevelopment", params="methodToCall=performOrganizationalSearch")
+	   public ModelAndView performOrganizationalSearch(@ModelAttribute("KualiForm") DocumentFormBase form, BindingResult result, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		ProposalDevelopmentDocumentForm pdForm = (ProposalDevelopmentDocumentForm) form;
+		pdForm.getAddOrganizationHelper().getResults().clear();
+		getRolodexLookupableHelperService().setBusinessObjectClass(Rolodex.class);
+		Map<String, String> fieldValuesMap = null;
+		List<Rolodex> results = null;
+		businessObjectService = (BusinessObjectService) KcServiceLocator.getService("businessObjectService");
+		fieldValuesMap = pdForm.getAddOrganizationHelper().getLookupFieldValues();
+		Collection<String> values = null;
+		values = fieldValuesMap.values();
+		boolean res = false;
+		if(values != null && values.size() > 0){
+			for(String val : values){
+				if(val != null){
+					res = true;
+				}
+			}
+		}
+		if (res) {
+			results = (List<Rolodex>) getRolodexLookupableHelperService().getSearchResults(fieldValuesMap);
+		} else {
+			results = (List<Rolodex>) businessObjectService.findAll(Rolodex.class);
+		}
+		pdForm.getAddOrganizationHelper().setResults(results);
+		return getTransactionalDocumentControllerService().refresh(form, result, request, response);
+
+	}
 
 	public LookupableHelperService getRolodexLookupableHelperService() {		
 		if (rolodexLookupableHelperService == null) {
@@ -102,64 +119,15 @@ public class ProposalDevelopmentOrganizationLocationController extends ProposalD
 	        performanceSite.setRolodex(pdForm.getAddOrganizationHelper().getResults().get(Integer.parseInt(selectedLine)));
 	        
 	        pdForm.getDevelopmentProposal().addPerformanceSite(performanceSite);
-	     
-	      /*  final int selectedLineIndex;
-	        if (StringUtils.isNotBlank(selectedLine)) {
-	            selectedLineIndex = Integer.parseInt(selectedLine);
-	        } else {
-	            selectedLineIndex = -1;
-	        }
-
-	        if (selectedLineIndex == -1) {
-	            throw new RuntimeException("Selected line index was not set for delete line action, cannot delete line");
-	        }
-	       */
-
-	        return null;
+	        return getTransactionalDocumentControllerService().refresh(form, result, request, response);
 	}
-	
 
-	
-	
-	/**
-     * Called by the delete line action for a model collection. Method
-     * determines which collection the action was selected for and the line
-     * index that should be removed, then invokes the view helper service to
-     * process the action
-     *//*
-    @RequestMapping(method = RequestMethod.POST, params = "methodToCall=selectLine")
-    public ModelAndView selectLine(@ModelAttribute("KualiForm") final UifFormBase uifForm, BindingResult result,
-            HttpServletRequest request, HttpServletResponse response) {
+	public BusinessObjectService getBusinessObjectService() {
+		return businessObjectService;
+	}
 
-        final String selectedCollectionPath = uifForm.getActionParamaterValue(UifParameters.SELECTED_COLLECTION_PATH);
-        final String selectedCollectionId = uifForm.getActionParamaterValue(UifParameters.SELECTED_COLLECTION_ID);
-
-        if (StringUtils.isBlank(selectedCollectionPath)) {
-            throw new RuntimeException("Selected collection was not set for delete line action, cannot delete line");
-        }
-
-        String selectedLine = uifForm.getActionParamaterValue(UifParameters.SELECTED_LINE_INDEX);
-        final int selectedLineIndex;
-        if (StringUtils.isNotBlank(selectedLine)) {
-            selectedLineIndex = Integer.parseInt(selectedLine);
-        } else {
-            selectedLineIndex = -1;
-        }
-
-        if (selectedLineIndex == -1) {
-            throw new RuntimeException("Selected line index was not set for delete line action, cannot delete line");
-        }
-
-        ViewLifecycle.encapsulateLifecycle(uifForm.getView(), uifForm, uifForm.getViewPostMetadata(), null, request,
-                response, new Runnable() {
-            @Override
-            public void run() {
-                ViewLifecycle.getHelper().processCollectionDeleteLine(uifForm, selectedCollectionId,
-                        selectedCollectionPath, selectedLineIndex);
-            }
-        });
-
-        return getUIFModelAndView(uifForm);
-    }*/
-	
+	public void setBusinessObjectService(BusinessObjectService businessObjectService) {
+		this.businessObjectService = businessObjectService;
+	}
 }
+

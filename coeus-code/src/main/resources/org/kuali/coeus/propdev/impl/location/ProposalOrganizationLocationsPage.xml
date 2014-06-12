@@ -29,6 +29,7 @@
 				<list>
 					<bean parent="PropDev-ApplicantOrganizationPage-Section" p:headerText="Applicant Organization" p:order="10" />
 					<bean parent="PropDev-PerformingOrganizationPage-Section" p:headerText="Performing Organization" p:order="20" />
+					<bean parent="PropDev-PerformanceSitesPage-Section"	p:headerText="Performance Site Locations" p:order="30" />
 					<bean parent="PropDev-OtherOrganizationsPage-Section" p:headerText="Other Organizations" p:order="40" />
 				</list>
 			</property>
@@ -227,4 +228,115 @@
 			</list>
 		</property>
 	</bean>	
+	
+	
+	<bean id="PropDev-PerformanceSitesPage-Section" parent="PropDev-PerformanceSitesPage-Section-parentBean" />
+	<bean id="PropDev-PerformanceSitesPage-Section-parentBean" abstract="true"  
+		parent="Uif-CssGridSection" p:header.headerText="performance sites" >
+		<property name="items">
+			<list>
+				<bean parent="Uif-PrimaryActionButton" p:iconClass="icon-office" p:actionLabel="Add Loaction"  p:actionScript="showDialog('PropDev-PerformanceSitesPage-InstitutionalSearchSection');"/>				
+			</list>
+		</property>
+	</bean>
+	
+	
+	<bean id="PropDev-PerformanceSitesPage-InstitutionalSearchSection" parent="PropDev-PerformanceSitesPage-InstitutionalSearchSection-ParentBean" />
+	<bean id="PropDev-PerformanceSitesPage-InstitutionalSearchSection-ParentBean" parent="Uif-DialogGroup" p:headerText="Institution Search"
+    p:promptText="Please Enter lookup criteria" p:fieldBindingObjectPath="addOrganizationHelper">
+    <!-- <property name="layoutManager.padding" value="50px"/> -->
+    <property name="items">
+	    <list>	    
+		    <bean parent="Uif-HorizontalFieldGroup">
+		    	<property name="items">
+	    			<list>
+	    				 	<bean parent="Uif-InputField" p:propertyName="lookupFieldValues['organization']" p:order="10"
+											p:dictionaryAttributeName="organization" p:label="Institution Name"/>
+						    <bean parent="Uif-InputField" p:propertyName="lookupFieldValues['postalCode']" p:order="20"
+											p:dictionaryAttributeName="postalCode" p:label="Postal Code" />
+						    <bean parent="Uif-InputField" p:propertyName="lookupFieldValues['state']" p:order="30"
+											p:dictionaryAttributeName="state" p:label="State"/>
+						    <bean parent="Uif-InputField" p:propertyName="lookupFieldValues['countryCode']" p:order="40"
+											p:dictionaryAttributeName="countryCode" p:label="Country Code"/>
+	    			</list>
+	    		</property>
+		    </bean>
+		</list>
+    </property>
+    <property name="footer.items">
+    <list>   
+			<bean parent="Uif-PrimaryActionButton" p:actionLabel="Add Unlisted Organization" 
+				p:actionScript="showDialog('PropDev-PerformanceSitesPage-AddUnlistedOrganizationSection');" 
+				p:successCallback="dismissDialog('PropDev-PerformanceSitesPage-InstitutionalSearchSection');"/>
+			<bean parent="Uif-PrimaryActionButton" p:actionLabel="Search" p:methodToCall="performOrganizationalSearch"				
+				p:successCallback="showDialog('PropDev-PerformanceSitesPage-SearchResultsSection');dismissDialog('PropDev-PerformanceSitesPage-InstitutionalSearchSection');" />
+    </list>
+    </property>
+    </bean>
+    
+    
+    <bean id="PropDev-PerformanceSitesPage-AddUnlistedOrganizationSection" parent="PropDev-PerformanceSitesPage-AddUnlistedOrganizationSection-ParentBean" />
+	<bean id="PropDev-PerformanceSitesPage-AddUnlistedOrganizationSection-ParentBean" parent="Uif-DialogGroup" p:headerText="Institution Search"
+    		p:promptText="Please Enter lookup criteria" p:fieldBindingObjectPath="addOrganizationHelper" >
+    <!-- <property name="layoutManager.padding" value="50px"/> -->
+    <property name="items">
+	    <list>    
+	    	<bean parent="Uif-InputField" p:propertyName="newOrganizationFieldValues['organization']" p:order="10"
+							p:dictionaryAttributeName="organization" p:label="Organization"/>
+			<bean parent="Uif-InputField" p:propertyName="newOrganizationFieldValues['addressLine1']" p:order="20"
+							p:dictionaryAttributeName="addressLine1" p:label="Address 1"/>
+			<bean parent="Uif-InputField" p:propertyName="newOrganizationFieldValues['addressLine2']" p:order="30"
+							p:dictionaryAttributeName="addressLine2" p:label="Address 2"/>
+			<bean parent="Uif-InputField" p:propertyName="newOrganizationFieldValues['city']" p:order="40"
+							p:dictionaryAttributeName="city" p:label="City"/>
+			<bean parent="Uif-InputField" p:propertyName="newOrganizationFieldValues['state']" p:order="50"
+							p:dictionaryAttributeName="state" p:label="State"/>
+			<bean parent="Uif-InputField" p:propertyName="newOrganizationFieldValues['zip']" p:order="60"
+							p:dictionaryAttributeName="zip" p:label="Zip"/>
+		</list>
+    </property>
+    <property name="footer.items">
+    <list>
+	    <bean parent="Uif-DialogDismissButton" p:actionLabel="Find An Organization" 
+	    	p:successCallback="dismissDialog('PropDev-PerformanceSitesPage-SearchResultsSection');"
+	    	p:actionScript="showDialog('PropDev-PerformanceSitesPage-InstitutionalSearchSection');"/>
+	    <bean parent="Uif-PrimaryActionButton" p:actionLabel="Add And Continue" p:methodToCall="addNewOrganization" 
+	    	p:successCallback="dismissDialog('PropDev-PerformanceSitesPage-SearchResultsSection');"/>
+    </list>
+    </property>
+    </bean>
+  
+    
+     <bean id="PropDev-PerformanceSitesPage-SearchResultsSection" parent="PropDev-PerformanceSitesPage-SearchResultsSection-ParentBean" />
+	 <bean id="PropDev-PerformanceSitesPage-SearchResultsSection-ParentBean" parent="Uif-DialogGroup" p:headerText="Search Results"
+    		p:promptText="Please Enter lookup criteria" p:fieldBindingObjectPath="addOrganizationHelper" >
+     <property name="items">
+	    <list> 
+	    
+	    	 <bean parent="Uif-TableCollectionSection"  
+				p:propertyName="results"
+				p:collectionObjectClass="org.kuali.coeus.common.framework.rolodex.Rolodex"
+				p:renderAddLine="false" p:layoutManager.renderSequenceField="false" p:layoutManager.actionColumnPlacement="LEFT" >
+				<property name="displayCollectionSize" value="200" />
+				<property name="items"  >
+					<list>
+						<bean parent="Uif-DataField" p:propertyName="rolodexId" />
+						<bean parent="Uif-DataField" p:propertyName="organization" />					
+					</list>
+				</property>	
+				<property name="lineActions">
+	      		<list>
+	      			<bean id="Uif-DeleteLineAction" parent="Uif-SecondaryActionButton-Small" p:methodToCall="selectLine"
+	        			p:actionLabel="Select"/>
+	      		</list>
+      	</property>		
+			</bean>
+			
+			 <bean parent="Uif-DialogDismissButton" p:actionLabel="Close"/>
+		</list>
+	 </property>
+	 </bean>
+    
+    
+    
 </beans>
