@@ -91,7 +91,7 @@ public class ProposalDevelopmentOrganizationLocationController extends ProposalD
 		 	performanceSite.setRolodex(rolodex);
 		 	performanceSite.setLocationTypeCode(ProposalSite.PROPOSAL_SITE_PERFORMANCE_SITE);
 		 	pdForm.getDevelopmentProposal().addPerformanceSite(performanceSite);
-			return null;
+		 	return getTransactionalDocumentControllerService().refresh(form, result, request, response);
 	}	
 	
 	@RequestMapping(value = "/proposalDevelopment", params="methodToCall=addDistrict")
