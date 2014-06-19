@@ -179,4 +179,6 @@ public interface ProposalDevelopmentService {
      * @return
      */
     String getGgTrackingIdFromProposal(InstitutionalProposal proposal);
+    
+    public void initializeProposalSites(ProposalDevelopmentDocument developmentDocument);
 }

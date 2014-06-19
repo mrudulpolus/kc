@@ -128,9 +128,11 @@ public abstract class ProposalDevelopmentControllerBase {
          ProposalDevelopmentDocument proposalDevelopmentDocument = (ProposalDevelopmentDocument) pdForm.getDocument();
 
          proposalDevelopmentService.initializeUnitOrganizationLocation(
-                 proposalDevelopmentDocument);
+        		 proposalDevelopmentDocument);
+         proposalDevelopmentService.initializeProposalSites(
+        		 proposalDevelopmentDocument);
          proposalDevelopmentService.initializeProposalSiteNumbers(
-                 proposalDevelopmentDocument);
+        		 proposalDevelopmentDocument);
          getTransactionalDocumentControllerService().save(form, result, request, response);
          
          initializeProposalUsers(proposalDevelopmentDocument);
@@ -186,7 +188,7 @@ public abstract class ProposalDevelopmentControllerBase {
      }
      
      protected ModelAndView navigate(DocumentFormBase form, BindingResult result, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		form.setPageId(form.getActionParamaterValue(UifParameters.NAVIGATE_TO_PAGE_ID));
+ 		form.setPageId(form.getActionParamaterValue(UifParameters.NAVIGATE_TO_PAGE_ID));
 		form.setDirtyForm(false);
 		return save(form, result, request, response);
      }

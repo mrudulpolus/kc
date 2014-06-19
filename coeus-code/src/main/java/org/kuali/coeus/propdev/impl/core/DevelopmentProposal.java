@@ -267,10 +267,8 @@ public class DevelopmentProposal extends KcPersistableBusinessObjectBase impleme
     @JoinColumn(name = "ACTIVITY_TYPE_CODE", referencedColumnName = "ACTIVITY_TYPE_CODE", insertable = false, updatable = false)
     private ActivityType activityType;
 
-    //@OneToMany(targetEntity = ProposalSite.class, orphanRemoval = true, cascade = { CascadeType.REFRESH, CascadeType.REMOVE, CascadeType.PERSIST })
-    //@JoinColumn(name = "PROPOSAL_NUMBER", referencedColumnName = "PROPOSAL_NUMBER", insertable = false, updatable = false)
-    //@OrderBy("siteNumber")
-    @Transient //Transient for now because this mapping is messed up
+    @OneToMany(mappedBy="developmentProposal", orphanRemoval = true, cascade = { CascadeType.ALL })
+    @OrderBy("siteNumber")
     private List<ProposalSite> proposalSites;
 
     @OneToMany(mappedBy="developmentProposal", orphanRemoval = true, cascade = { CascadeType.ALL })
@@ -1090,6 +1088,7 @@ public class DevelopmentProposal extends KcPersistableBusinessObjectBase impleme
     }
 
     public void addProposalSite(ProposalSite proposalSite) {
+    	proposalSite.setDevelopmentProposal(this);
         proposalSites.add(proposalSite);
     }
 
@@ -1102,6 +1101,7 @@ public class DevelopmentProposal extends KcPersistableBusinessObjectBase impleme
     private void setProposalSiteForType(ProposalSite proposalSite, int locationType) {
         deleteAllProposalSitesOfType(locationType);
         proposalSite.setLocationTypeCode(locationType);
+        proposalSite.setDevelopmentProposal(this);
         // make sure the location type is set 
         addProposalSite(proposalSite);
     }
@@ -1116,6 +1116,7 @@ public class DevelopmentProposal extends KcPersistableBusinessObjectBase impleme
         deleteAllProposalSitesOfType(locationType);
         for (ProposalSite proposalSite : proposalSites) {
             proposalSite.setLocationTypeCode(locationType);
+            proposalSite.setDevelopmentProposal(this);
         }
         proposalSites.addAll(proposalSites);
     }
@@ -2106,9 +2107,8 @@ public class DevelopmentProposal extends KcPersistableBusinessObjectBase impleme
      * This method sets the proposal number on all sub-BOs that have a proposal number.
      */
     public void updateProposalNumbers() {
-        String proposalNumber = getProposalNumber();
         for (ProposalSite site : getProposalSites()) {
-            site.setProposalNumber(proposalNumber);
+        	site.setDevelopmentProposal(this);
         }
         if (s2sOpportunity != null) {
             this.proposalNumberForGG = proposalNumber;

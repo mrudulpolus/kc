@@ -167,7 +167,7 @@
 		</property>		
 		<property name="collectionLookup">
 			<bean parent="Uif-CollectionQuickFinder" p:dataObjectClassName="org.kuali.coeus.common.framework.org.Organization" 
-				p:fieldConversions="organizationId:organization.organizationId,organizationName:organization.organizationName" >
+				p:fieldConversions="organizationId:organizationId" >
 				<property name="quickfinderAction">
 					<bean parent="Uif-PrimaryActionButton" p:iconClass="icon-office" p:actionLabel="Add Organization" p:methodToCall="performLookup"/>
 				</property>
@@ -235,7 +235,7 @@
 	
 	<bean id="PropDev-PerformanceSitesPage-Section" parent="PropDev-PerformanceSitesPage-Section-parentBean" />
 	<bean id="PropDev-PerformanceSitesPage-Section-parentBean" abstract="true"  
-		parent="Uif-CssGridSection" p:header.headerText="performance sites" >
+		parent="Uif-VerticalBoxSubSection" p:header.headerText="performance sites" >
 		<property name="items">
 			<list>
 				<bean parent="PropDev-PerformanceSitesPage-AddButton" p:order="10" />
@@ -259,6 +259,9 @@
 		p:retrieveViaAjax="true">
 		<property name="header">
 			<bean parent="Uif-HeaderOne" p:headerText="Institution Search" />
+		</property>
+		<property name="layoutManager">
+			<bean parent="Uif-VerticalBoxLayout"/>
 		</property>
 		<property name="items">
 			<list>
@@ -375,12 +378,11 @@
 		</property>
 		<property name="lineActions">
 			<list>
-				<bean id="Uif-DeleteLineAction" parent="Uif-SecondaryActionButton-Small">
-					<property name="actionLabel" value="Select" />
+				<bean id="SelectLineAction" parent="Uif-SecondaryActionButton-Small">
+					<property name="actionLabel" value="Select"/>
 					<property name="methodToCall" value="selectLine" />
-					<property name="refreshId" value="PropDev-PerformanceSitesPage-PerformanceSiteLocations" />
-					<property name="actionParameters" value="PropDev-performanceSitesPage-Wizard.step:1" />					
-					<property name="successCallback" value="dismissDialog('PropDev-performanceSitesPage-Wizard');" />					
+					<property name="successCallback" value="dismissDialog('PropDev-performanceSitesPage-Wizard');" />				
+					<property name="refreshId" value="PropDev-PerformanceSitesPage-Section" />
 				</bean>
 			</list>
 		</property>
@@ -436,21 +438,29 @@
 			<null />
 		</property>
 		<property name="items">
-			<list>
-			<bean parent="Uif-HorizontalFieldGroup" p:label="Organization" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}" >
-        		<property name="items">
-          			<list>						
-						<bean parent="Uif-DataField" p:propertyName="rolodex.organization"	p:order="10" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
-						<bean parent="Uif-DataField" p:propertyName="rolodex.city"	p:order="20" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
-						<bean parent="Uif-DataField" p:propertyName="rolodex.state"	p:order="30" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
-						<bean parent="Uif-DataField" p:propertyName="rolodex.addressLine1"	p:order="40" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
-						<bean parent="Uif-DataField" p:propertyName="rolodex.addressLine2"	p:order="50" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
-						<bean parent="Uif-DataField" p:propertyName="rolodex.postalCode"	p:order="60" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  /> 
-					</list>
-				</property>
-			</bean>
-			<bean parent="Uif-InputField" p:propertyName="organization.address"	p:readOnly="true" p:order="20" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}" p:label="Address" />				
-			</list>
+		 <list>
+				<bean parent="Uif-DataField" p:propertyName="rolodex.organization"	p:order="10" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
+				<bean parent="Uif-DataField" p:propertyName="rolodex.city"	p:order="20" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
+				<bean parent="Uif-DataField" p:propertyName="rolodex.state"	p:order="30" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
+				<bean parent="Uif-DataField" p:propertyName="rolodex.addressLine1"	p:order="40" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
+				<bean parent="Uif-DataField" p:propertyName="rolodex.addressLine2"	p:order="50" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
+				<bean parent="Uif-DataField" p:propertyName="rolodex.postalCode"	p:order="60" p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}"  />
+				
+				<bean  parent="Uif-InputField" p:order="70" p:propertyName="rolodex.rolodexId" p:label=" " p:render="@{#lp.locationTypeCode==#lp.PROPOSAL_SITE_PERFORMANCE_SITE}">
+							<property name="control">
+								<bean parent="Uif-HiddenControl" />
+							</property>
+							<property name="quickfinder">
+								<bean parent="Uif-QuickFinder" p:dataObjectClassName="org.kuali.coeus.common.framework.rolodex.Rolodex"
+									p:hideCriteriaOnSearch="true"
+									p:fieldConversions="organization:rolodex.organization,city:rolodex.city,state:rolodex.state,addressLine1:rolodex.addressLine1,addressLine2:rolodex.addressLine2,postalCode:rolodex.postalCode">
+									<property name="quickfinderAction">
+										<bean parent="Uif-ActionLink" p:methodToCall="performLookup" p:actionLabel="Change" />
+									</property>
+								</bean>
+							</property>
+						</bean> 
+		</list>
 		</property>
 		<property name="subCollections">
 			<list>

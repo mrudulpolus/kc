@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.kuali.coeus.common.framework.rolodex.Rolodex;
+import org.kuali.coeus.propdev.impl.core.DevelopmentProposal;
 import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentControllerBase;
 import org.kuali.coeus.propdev.impl.core.ProposalDevelopmentDocumentForm;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
@@ -113,12 +114,19 @@ public class ProposalDevelopmentOrganizationLocationController extends ProposalD
 	        }
 
 	        String selectedLine = form.getActionParamaterValue(UifParameters.SELECTED_LINE_INDEX);	        
-	        ProposalDevelopmentDocumentForm pdForm = (ProposalDevelopmentDocumentForm) form;	        
+	        ProposalDevelopmentDocumentForm pdForm = (ProposalDevelopmentDocumentForm) form;	 
+	        DevelopmentProposal developmentProposal = pdForm.getDevelopmentProposal();
 	        ProposalSite performanceSite = new ProposalSite();
-	        performanceSite.setLocationTypeCode(ProposalSite.PROPOSAL_SITE_PERFORMANCE_SITE);	        
-	        performanceSite.setRolodex(pdForm.getAddOrganizationHelper().getResults().get(Integer.parseInt(selectedLine)));
-	        
+	        performanceSite.setLocationTypeCode(ProposalSite.PROPOSAL_SITE_PERFORMANCE_SITE);
+	        Rolodex rolodex = null;
+	        rolodex = pdForm.getAddOrganizationHelper().getResults().get(Integer.parseInt(selectedLine));
+	        performanceSite.setRolodex(rolodex);
+	        performanceSite.setLocationName(rolodex.getOrganization());
+	        performanceSite.setRolodexId(rolodex.getRolodexId());
+	        performanceSite.setOrganizationId(rolodex.getOwnedByUnit());
+	        performanceSite.setDevelopmentProposal(developmentProposal);
 	        pdForm.getDevelopmentProposal().addPerformanceSite(performanceSite);
+	     
 	        return getTransactionalDocumentControllerService().refresh(form, result, request, response);
 	}
 

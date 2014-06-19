@@ -39,11 +39,9 @@ public class CongressionalDistrict extends KcPersistableBusinessObjectBase {
     @Column(name = "CONG_DISTRICT_ID")
     private Long congressionalDistrictId;
 
-    @Column(name = "PROPOSAL_NUMBER")
-    private String proposalNumber;
-
-    @Column(name = "SITE_NUMBER")
-    private Integer siteNumber;
+    @ManyToOne(cascade = { CascadeType.REFRESH })
+    @JoinColumns({ @JoinColumn(name = "PROPOSAL_NUMBER", referencedColumnName = "PROPOSAL_NUMBER"), @JoinColumn(name = "SITE_NUMBER", referencedColumnName = "SITE_NUMBER") })
+    private ProposalSite proposalSite;
 
     @Column(name = "CONG_DISTRICT")
     private String congressionalDistrict;
@@ -60,22 +58,6 @@ public class CongressionalDistrict extends KcPersistableBusinessObjectBase {
 
     public Long getCongressionalDistrictId() {
         return congressionalDistrictId;
-    }
-
-    public void setProposalNumber(String proposalNumber) {
-        this.proposalNumber = proposalNumber;
-    }
-
-    public String getProposalNumber() {
-        return proposalNumber;
-    }
-
-    public void setSiteNumber(Integer siteNumber) {
-        this.siteNumber = siteNumber;
-    }
-
-    public Integer getSiteNumber() {
-        return siteNumber;
     }
 
     public String getCongressionalDistrict() {
@@ -107,6 +89,14 @@ public class CongressionalDistrict extends KcPersistableBusinessObjectBase {
 
 	public void setNewDistrictNumber(String newDistrictNumber) {
 		this.newDistrictNumber = newDistrictNumber;
+	}
+
+	public ProposalSite getProposalSite() {
+		return proposalSite;
+	}
+
+	public void setProposalSite(ProposalSite proposalSite) {
+		this.proposalSite = proposalSite;
 	}
     
 }
