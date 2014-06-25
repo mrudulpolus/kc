@@ -54,7 +54,8 @@ public class ProposalDevelopmentDocumentForm extends TransactionalDocumentFormBa
     private String selectedCustomDataGroup;
     private List<ProposalDevelopmentDataValidationItem> dataValidationItems;
     private boolean validateData;
-    private OrganizationAddWizardHelper addOrganizationHelper;
+    private OrganizationAddWizardHelper addOrganizationHelper;    
+    private List<ProposalCreditSplitListDto> creditSplitListItems;
 
     public ProposalDevelopmentDocumentForm() {
         super();
@@ -77,6 +78,8 @@ public class ProposalDevelopmentDocumentForm extends TransactionalDocumentFormBa
         dataValidationItems = new ArrayList<ProposalDevelopmentDataValidationItem>();
 
         addOrganizationHelper = new OrganizationAddWizardHelper();
+        
+        creditSplitListItems = new ArrayList<ProposalCreditSplitListDto>();
     }
 
     public int findIndexOfPageId(List<Action> actions) {
@@ -201,6 +204,14 @@ public class ProposalDevelopmentDocumentForm extends TransactionalDocumentFormBa
 
     public void setValidateData(boolean validateData) {
         this.validateData = validateData;
+    }
+    
+    public List<ProposalCreditSplitListDto> getCreditSplitListItems() {
+        return creditSplitListItems;
+    }
+
+    public void setCreditSplitListItems(List<ProposalCreditSplitListDto> creditSplitListItems) {
+        this.creditSplitListItems = creditSplitListItems;
     }
 
     public Tree<Object, String> getMedusaTreeView() {
